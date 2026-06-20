@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <Platforms>AnyCPU;x64</Platforms>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Prism.DryIoc" Version="9.0.537" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="DALSA.SaperaLT.SapClassBasic">
+      <HintPath>..\..\FSPCBDectection(20260102)\FSPCBDectection(20251108)\PCBDectection\DLL\DALSA.SaperaLT.SapClassBasic.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="halcondotnet">
+      <HintPath>..\..\FSPCBDectection(20260102)\FSPCBDectection(20251108)\PCBDectection\DLL\halcondotnet.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="halcondotnetxl">
+      <HintPath>..\..\FSPCBDectection(20260102)\FSPCBDectection(20251108)\PCBDectection\DLL\halcondotnetxl.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="HslCommunication">
+      <HintPath>..\..\FSPCBDectection(20260102)\FSPCBDectection(20251108)\PCBDectection\DLL\HslCommunication.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="MvCameraControl.Net">
+      <HintPath>..\..\FSPCBDectection(20260102)\FSPCBDectection(20251108)\PCBDectection\DLL\MvCameraControl.Net.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\FSPCBDectection(20260102)\FSPCBDectection(20251108)\PCBDectection\DLL\Newtonsoft.Json.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="OpenCvSharp">
+      <HintPath>..\..\FSPCBDectection(20260102)\FSPCBDectection(20251108)\PCBDectection\DLL\OpenCvSharp.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="OpenCvSharp.Extensions">
+      <HintPath>..\..\FSPCBDectection(20260102)\FSPCBDectection(20251108)\PCBDectection\DLL\OpenCvSharp.Extensions.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="teAiFlowEngine_CSharp">
+      <HintPath>..\..\FSPCBDectection(20260102)\FSPCBDectection(20251108)\PCBDectection\DLL\teAiFlowEngine_CSharp.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>
