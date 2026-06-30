@@ -8,17 +8,17 @@ public interface ICameraService
 
     string CameraName { get; }
 
-    string ConnectionStatus { get; }
+    bool ConnectionStatus { get; }
 
-    Task<DeviceStatus> InitializeAsync(CancellationToken cancellationToken);
+    Task InitializeAsync(CancellationToken cancellationToken);
 
-    Task<DeviceStatus> ConnectAsync(CancellationToken cancellationToken);
+    Task ConnectAsync(CancellationToken cancellationToken);
 
-    Task<DeviceStatus> DisconnectAsync(CancellationToken cancellationToken);
+    Task DisconnectAsync(CancellationToken cancellationToken);
 
-    Task<DeviceStatus> StartGrabbingAsync(CancellationToken cancellationToken);
+    Task StartGrabbingAsync(CancellationToken cancellationToken);
 
-    Task<DeviceStatus> StopGrabbingAsync(CancellationToken cancellationToken);
+    Task StopGrabbingAsync(CancellationToken cancellationToken);
 
     Task<CameraFrame> SoftwareTriggerAsync(CancellationToken cancellationToken);
 

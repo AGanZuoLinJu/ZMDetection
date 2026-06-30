@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="ZM-PCB检测平台 Windows 桌面端实时机器视觉检测工作台实例。" />
+  <title>ZM-PCB检测平台 · 实时检测</title>
+  <style>
+    :root {
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --surface-warm: var(--surface);
+      --fg: #111111;
+      --fg-2: var(--fg);
+      --muted: #6b6b6b;
+      --meta: var(--muted);
+      --border: #e5e5e5;
+      --border-soft: var(--border);
+      --accent: #2f6feb;
+      --accent-on: #ffffff;
+      --accent-hover: color-mix(in oklab, var(--accent), black 8%);
+      --accent-active: color-mix(in oklab, var(--accent), black 14%);
+      --success: #17a34a;
+      --warn: #eab308;
+      --danger: #dc2626;
+      --font-display: "Inter", -apple-system, system-ui, sans-serif;
+      --font-body: "Inter", -apple-system, system-ui, sans-serif;
+      --font-mono: ui-monospace, "JetBrains Mono", monospace;
+      --text-xs: 12px;
+      --text-sm: 14px;
+      --text-base: 16px;
+      --text-lg: 20px;
+      --text-xl: 24px;
+      --text-2xl: 32px;
+      --text-3xl: 48px;
+      --text-4xl: 64px;
+      --leading-body: 1.5;
+      --leading-tight: 1.2;
+      --tracking-display: -0.01em;
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-12: 48px;
+      --space-20: 80px;
+      --section-y-desktop: 80px;
+      --section-y-tablet: 48px;
+      --section-y-phone: 32px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-pill: 9999px;
+      --elev-flat: none;
+      --elev-ring: 0 0 0 1px var(--border);
+      --elev-raised: 0 2px 8px color-mix(in oklab, var(--fg), transparent 92%);
+      --focus-ring: 0 0 0 3px color-mix(in oklab, var(--accent), transparent 70%);
+      --motion-fast: 150ms;
+      --motion-base: 200ms;
+      --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+      --container-max: 1200px;
+      --container-gutter-desktop: 24px;
+      --container-gutter-tablet: 16px;
+      --container-gutter-phone: 12px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      min-width: 1120px;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      line-height: var(--leading-body);
+      -webkit-font-smoothing: antialiased;
+    }
+    button, select { font: inherit; }
+    button { cursor: pointer; }
+    svg { display: block; }
+    :focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+    .app {
+      height: 100vh;
+      display: grid;
+      grid-template-rows: 46px 1fr 32px;
+      background: var(--bg);
+    }
+    .titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-left: var(--space-4);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      user-select: none;
+    }
+    .brand, .title-actions, .inline, .device-state, .toolbar-group {
+      display: flex;
+      align-items: center;
+    }
+    .brand { gap: 10px; font-weight: 600; }
+    .brand-mark {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      background: var(--accent);
+      color: var(--accent-on);
+    }
+    .brand-mark svg { width: 15px; height: 15px; }
+    .version { color: var(--muted); font: 11px var(--font-mono); }
+    .title-actions { height: 100%; }
+    .window-btn {
+      width: 46px;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+    }
+    .window-btn:hover { background: color-mix(in oklab, var(--fg), transparent 95%); color: var(--fg); }
+    .window-btn.close:hover { background: var(--danger); color: var(--accent-on); }
+    .window-btn svg { width: 13px; height: 13px; }
+
+    .workspace {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 196px minmax(560px, 1fr) 308px;
+    }
+    .sidebar {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: var(--space-3);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+    }
+    .nav-label {
+      padding: 12px 10px 6px;
+      color: var(--muted);
+      font-size: var(--text-xs);
+    }
+    .nav-list { display: grid; gap: 4px; }
+    .nav-item {
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 10px;
+      border: 0;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--muted);
+      text-align: left;
+      transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard);
+    }
+    .nav-item svg { width: 18px; height: 18px; }
+    .nav-item:hover { background: color-mix(in oklab, var(--fg), transparent 96%); color: var(--fg); }
+    .nav-item.active { background: color-mix(in oklab, var(--accent), transparent 90%); color: var(--accent); font-weight: 600; }
+    .sidebar-spacer { flex: 1; }
+    .operator {
+      display: grid;
+      grid-template-columns: 32px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 8px 4px;
+      border-top: 1px solid var(--border);
+    }
+    .avatar {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius-pill);
+      background: color-mix(in oklab, var(--fg), transparent 92%);
+      font-weight: 600;
+    }
+    .operator strong { display: block; font-size: var(--text-sm); }
+    .operator span { display: block; color: var(--muted); font-size: 11px; }
+
+    .main {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: 58px minmax(360px, 1fr) 176px;
+      background: color-mix(in oklab, var(--bg), var(--border) 20%);
+    }
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      padding: 0 var(--space-4);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .toolbar-group { gap: 8px; }
+    .select-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+    }
+    select {
+      height: 36px;
+      min-width: 160px;
+      padding: 0 34px 0 11px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--fg);
+    }
+    .btn {
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--fg);
+      font-weight: 500;
+      transition: background var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard);
+    }
+    .btn:hover { background: color-mix(in oklab, var(--fg), transparent 96%); }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary { border-color: var(--accent); background: var(--accent); color: var(--accent-on); }
+    .btn.primary:hover { background: var(--accent-hover); }
+    .btn svg { width: 16px; height: 16px; }
+    .btn[disabled] { cursor: not-allowed; opacity: .48; }
+
+    .vision-stage {
+      min-height: 0;
+      padding: var(--space-3);
+    }
+    .viewer {
+      position: relative;
+      height: 100%;
+      min-height: 330px;
+      overflow: hidden;
+      border: 1px solid color-mix(in oklab, var(--fg), transparent 80%);
+      border-radius: var(--radius-md);
+      background: color-mix(in oklab, var(--fg), var(--surface) 8%);
+    }
+    .viewer-head {
+      position: absolute;
+      z-index: 3;
+      inset: 12px 12px auto 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--accent-on);
+    }
+    .camera-chip, .zoom-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 30px;
+      padding: 0 10px;
+      border: 1px solid color-mix(in oklab, var(--accent-on), transparent 78%);
+      border-radius: var(--radius-sm);
+      background: color-mix(in oklab, var(--fg), transparent 20%);
+      color: var(--accent-on);
+      backdrop-filter: blur(6px);
+      font-size: var(--text-xs);
+    }
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--success), transparent 78%);
+    }
+    .zoom-tools { gap: 0; padding: 0; }
+    .zoom-tools button {
+      width: 34px;
+      height: 30px;
+      border: 0;
+      border-right: 1px solid color-mix(in oklab, var(--accent-on), transparent 82%);
+      background: transparent;
+      color: inherit;
+    }
+    .zoom-tools button:last-child { border-right: 0; }
+    .pcb-scene {
+      width: 100%;
+      height: 100%;
+      padding: 42px 56px 36px;
+      color: var(--success);
+      transition: transform var(--motion-base) var(--ease-standard);
+      transform-origin: center;
+    }
+    .pcb-board {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 14px 18px color-mix(in oklab, var(--fg), transparent 58%));
+    }
+    .viewer-foot {
+      position: absolute;
+      z-index: 3;
+      left: 12px;
+      right: 12px;
+      bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      color: color-mix(in oklab, var(--accent-on), transparent 20%);
+      font: 11px var(--font-mono);
+    }
+    .defect-box {
+      cursor: pointer;
+      fill: transparent;
+      stroke: var(--danger);
+      stroke-width: 4;
+      vector-effect: non-scaling-stroke;
+    }
+    .defect-box.active { stroke-width: 7; filter: drop-shadow(0 0 7px var(--danger)); }
+    .defect-tag { fill: var(--danger); }
+    .defect-text { fill: var(--accent-on); font: 600 16px var(--font-body); }
+    .trace { stroke: color-mix(in oklab, var(--warn), var(--accent-on) 25%); stroke-width: 5; fill: none; opacity: .75; }
+    .pad { fill: color-mix(in oklab, var(--warn), var(--accent-on) 18%); }
+    .chip { fill: color-mix(in oklab, var(--fg), var(--surface) 18%); stroke: color-mix(in oklab, var(--accent-on), transparent 55%); stroke-width: 2; }
+    .silk { fill: none; stroke: color-mix(in oklab, var(--accent-on), transparent 42%); stroke-width: 2; }
+
+    .lower-panel {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: var(--space-3);
+      padding: 0 var(--space-3) var(--space-3);
+    }
+    .panel {
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+    }
+    .panel-head {
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-head strong { font-size: var(--text-sm); }
+    .text-btn { border: 0; background: transparent; color: var(--accent); font-size: var(--text-xs); }
+    .defect-table-wrap { overflow: hidden; }
+    .defect-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: var(--text-xs);
+    }
+    .defect-table th {
+      padding: 8px 5px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      font-weight: 500;
+      line-height: 1.2;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .defect-table th:first-child,
+    .defect-table td:first-child { padding-left: 14px; text-align: left; }
+    .defect-table th:last-child,
+    .defect-table td:last-child { padding-right: 14px; }
+    .defect-row {
+      cursor: pointer;
+      color: var(--fg);
+      outline: none;
+    }
+    .defect-row td {
+      height: 46px;
+      padding: 7px 5px;
+      border-bottom: 1px solid var(--border);
+      line-height: 1.25;
+      text-align: center;
+      vertical-align: middle;
+    }
+    .defect-row:last-child td { border-bottom: 0; }
+    .defect-row:hover, .defect-row.active { background: color-mix(in oklab, var(--danger), transparent 96%); }
+    .defect-row:focus-visible { box-shadow: inset var(--focus-ring); }
+    .defect-name { display: grid; gap: 2px; }
+    .defect-name strong { font-size: var(--text-xs); white-space: nowrap; }
+    .defect-id { color: var(--danger); font: 600 11px var(--font-mono); }
+    .defect-coordinate,
+    .defect-measure { font: 11px/1.35 var(--font-mono); }
+    .defect-coordinate { color: var(--muted); }
+    .log-list { padding: 5px 14px; }
+    .log-row {
+      display: grid;
+      grid-template-columns: 66px 1fr;
+      gap: 10px;
+      padding: 6px 0;
+      color: var(--muted);
+      font-size: var(--text-xs);
+    }
+    .log-time { font-family: var(--font-mono); }
+    .log-row strong { color: var(--fg); font-weight: 500; }
+
+    .right-panel {
+      min-height: 0;
+      overflow-y: auto;
+      padding: var(--space-3);
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+    }
+    .side-card {
+      margin-bottom: var(--space-3);
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+    }
+    .side-card h2 {
+      margin: 0 0 14px;
+      font: 600 var(--text-sm) var(--font-display);
+    }
+    .kv {
+      display: grid;
+      grid-template-columns: 82px 1fr;
+      gap: 8px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .kv:last-child { border-bottom: 0; }
+    .kv span { color: var(--muted); font-size: var(--text-xs); }
+    .kv strong { text-align: right; font-weight: 500; }
+    .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+    .result-card { text-align: center; padding: 18px 16px; }
+    .result-label { color: var(--muted); font-size: var(--text-xs); }
+    .result {
+      margin: 3px 0;
+      color: var(--danger);
+      font: 700 var(--text-3xl) var(--font-display);
+      letter-spacing: var(--tracking-display);
+    }
+    .result.ok { color: var(--success); }
+    .result-note { color: var(--muted); font-size: var(--text-xs); }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .stat {
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .stat:nth-child(-n+2) { padding-top: 0; border-top: 0; }
+    .stat span { display: block; color: var(--muted); font-size: var(--text-xs); }
+    .stat strong { display: block; margin-top: 2px; font: 600 var(--text-xl) var(--font-mono); }
+    .stat.ok strong { color: var(--success); }
+    .stat.ng strong { color: var(--danger); }
+    .yield {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .yield-head { display: flex; justify-content: space-between; margin-bottom: 7px; font-size: var(--text-xs); }
+    .progress { height: 6px; overflow: hidden; border-radius: var(--radius-pill); background: var(--border); }
+    .progress span { display: block; width: 98.7%; height: 100%; background: var(--success); }
+    .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .action-grid .btn { padding: 0 8px; font-size: var(--text-xs); }
+
+    .statusbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 11px;
+    }
+    .device-state { gap: 16px; }
+    .state-item { display: flex; align-items: center; gap: 6px; }
+    .state-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); }
+    .state-dot.warn { background: var(--warn); }
+    .toast {
+      position: fixed;
+      z-index: 20;
+      right: 20px;
+      bottom: 46px;
+      max-width: 320px;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      box-shadow: var(--elev-raised);
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: opacity var(--motion-base) var(--ease-standard), transform var(--motion-base) var(--ease-standard);
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-height: 760px) {
+      .main { grid-template-rows: 58px minmax(320px, 1fr) 154px; }
+      .defect-row td { height: 42px; }
+      .side-card { padding: 12px 14px; }
+      .kv { padding: 5px 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="titlebar" data-od-id="titlebar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8h3v3H8zM13 13h3v3h-3zM11 9h5M9 11v5"/></svg>
+        </span>
+        <span>ZM-PCB检测平台</span>
+        <span class="version">v1.0.0</span>
+      </div>
+      <div class="title-actions" aria-label="窗口控制">
+        <button class="window-btn" aria-label="最小化"><svg viewBox="0 0 16 16" stroke="currentColor"><path d="M3 8h10"/></svg></button>
+        <button class="window-btn" aria-label="最大化"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><rect x="3.5" y="3.5" width="9" height="9"/></svg></button>
+        <button class="window-btn close" aria-label="关闭"><svg viewBox="0 0 16 16" stroke="currentColor"><path d="m4 4 8 8m0-8-8 8"/></svg></button>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <aside class="sidebar" data-od-id="primary-navigation">
+        <div class="nav-label">生产</div>
+        <nav class="nav-list" aria-label="主导航">
+          <button class="nav-item active" data-page="实时检测"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16v10H4z"/><path d="M8 20h8M12 17v3"/><circle cx="12" cy="12" r="2.5"/></svg>实时检测</button>
+          <button class="nav-item" data-page="历史记录"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v15H4zM8 3v4m8-4v4M7 11h10M7 15h5"/></svg>历史记录</button>
+          <button class="nav-item" data-page="统计报表"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 19V9m7 10V5m7 14v-7M3 19h18"/></svg>统计报表</button>
+        </nav>
+        <div class="nav-label">配置</div>
+        <nav class="nav-list" aria-label="配置导航">
+          <button class="nav-item" data-page="产品型号"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m4 8 8-4 8 4-8 4z"/><path d="m4 8v8l8 4 8-4V8M12 12v8"/></svg>产品型号</button>
+          <button class="nav-item" data-page="检测方案"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 4h12v16H6zM9 8h6m-6 4h6m-6 4h3"/></svg>检测方案</button>
+          <button class="nav-item" data-page="设备管理"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19 13.5v-3l-2-.7-.5-1.2.9-1.9-2.1-2.1-1.9.9-1.2-.5-.7-2h-3l-.7 2-1.2.5-1.9-.9-2.1 2.1.9 1.9-.5 1.2-2 .7v3l2 .7.5 1.2-.9 1.9 2.1 2.1 1.9-.9 1.2.5.7 2h3l.7-2 1.2-.5 1.9.9 2.1-2.1-.9-1.9.5-1.2z"/></svg>设备管理</button>
+          <button class="nav-item" data-page="系统设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h10M18 7h2M4 17h2m4 0h10M14 4v6M6 14v6"/></svg>系统设置</button>
+        </nav>
+        <div class="sidebar-spacer"></div>
+        <div class="operator">
+          <div class="avatar">管</div>
+          <div><strong>管理员</strong><span>设备维护权限</span></div>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"><path d="m4 6 4 4 4-4"/></svg>
+        </div>
+      </aside>
+
+      <main class="main" data-od-id="inspection-workbench">
+        <section class="toolbar" data-od-id="inspection-toolbar">
+          <div class="toolbar-group">
+            <div class="select-wrap">产品型号
+              <span aria-label="当前产品型号" style="color: var(--fg); font-weight: 500;">ZM-A100 主控板</span>
+            </div>
+          </div>
+          <div class="toolbar-group">
+            <button class="btn" id="snapshotBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h4l2-2h4l2 2h4v12H4z"/><circle cx="12" cy="13" r="4"/></svg>手动采图</button>
+            <button class="btn primary" id="runBtn"><svg id="runIcon" viewBox="0 0 24 24" fill="currentColor"><path d="m8 5 11 7-11 7z"/></svg><span id="runText">开始检测</span></button>
+          </div>
+        </section>
+
+        <section class="vision-stage" data-od-id="camera-view">
+          <div class="viewer">
+            <div class="viewer-head">
+              <div class="camera-chip"><span class="live-dot"></span><span id="cameraStatus">CAM-01 · 实时</span></div>
+              <div class="zoom-tools" aria-label="图像缩放">
+                <button id="zoomOut" aria-label="缩小">−</button>
+                <button id="zoomReset" aria-label="恢复原始比例">1:1</button>
+                <button id="zoomIn" aria-label="放大">＋</button>
+              </div>
+            </div>
+            <div class="pcb-scene" id="pcbScene">
+              <svg class="pcb-board" viewBox="0 0 900 520" role="img" aria-label="PCB检测图像，包含两个焊点缺陷标注">
+                <rect x="18" y="18" width="864" height="484" rx="20" fill="currentColor"/>
+                <path class="silk" d="M42 68h240v120H42zm584-22h210v154H626zM400 330h220v130H400z"/>
+                <path class="trace" d="M90 235h160v80h122M90 270h110v100h150M520 120H360v110H238M705 235v64H560v52"/>
+                <g class="pad">
+                  <circle cx="90" cy="235" r="11"/><circle cx="90" cy="270" r="11"/><circle cx="250" cy="315" r="11"/>
+                  <circle cx="350" cy="370" r="11"/><circle cx="520" cy="120" r="11"/><circle cx="705" cy="235" r="11"/>
+                  <circle cx="560" cy="351" r="11"/><circle cx="748" cy="382" r="11"/>
+                </g>
+                <g>
+                  <rect class="chip" x="305" y="155" width="190" height="140" rx="8"/>
+                  <rect class="chip" x="92" y="86" width="112" height="76" rx="6"/>
+                  <rect class="chip" x="654" y="78" width="140" height="88" rx="6"/>
+                  <rect class="chip" x="438" y="358" width="144" height="72" rx="6"/>
+                  <path class="silk" d="M326 178h148v94H326zM112 106h72v36h-72zM674 98h100v48H674z"/>
+                </g>
+                <g id="defectA" tabindex="0" role="button" aria-label="缺陷 D01：焊点连锡">
+                  <rect class="defect-box active" x="213" y="292" width="76" height="64" rx="4"/>
+                  <rect class="defect-tag" x="213" y="267" width="48" height="25" rx="3"/>
+                  <text class="defect-text" x="222" y="285">D01</text>
+                </g>
+                <g id="defectB" tabindex="0" role="button" aria-label="缺陷 D02：元件偏移">
+                  <rect class="defect-box" x="630" y="61" width="184" height="124" rx="4"/>
+                  <rect class="defect-tag" x="630" y="36" width="48" height="25" rx="3"/>
+                  <text class="defect-text" x="639" y="54">D02</text>
+                </g>
+              </svg>
+            </div>
+            <div class="viewer-foot"><span>2448 × 2048 · 8 bit · 12.4 ms</span><span id="zoomValue">100%</span></div>
+          </div>
+        </section>
+
+        <section class="lower-panel" data-od-id="run-log" style="grid-template-columns: 1fr;">
+          <div class="panel">
+            <div class="panel-head"><strong>运行日志</strong><button class="text-btn" id="clearLog">清空</button></div>
+            <div class="log-list" id="logList">
+              <div class="log-row"><span class="log-time">09:46:28</span><strong>检测完成：判定 NG，发现 2 处缺陷</strong></div>
+              <div class="log-row"><span class="log-time">09:46:27</span><span>图像采集完成，算法耗时 118 ms</span></div>
+              <div class="log-row"><span class="log-time">09:46:21</span><span>产品到位信号已触发</span></div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <aside class="right-panel" data-od-id="inspection-data">
+        <section class="side-card" data-od-id="product-data">
+          <h2>当前产品</h2>
+          <div class="kv"><span>产品 ID</span><strong class="mono" id="productId">PCB260629-0846</strong></div>
+          <div class="kv"><span>产品型号</span><strong>ZM-A100</strong></div>
+          <div class="kv"><span>检测面</span><strong>A 面</strong></div>
+        </section>
+
+        <section class="side-card result-card" data-od-id="inspection-result">
+          <div class="result-label">本次检测结果</div>
+          <div class="result" id="resultValue">NG</div>
+          <div class="result-note" id="resultNote">发现 2 处缺陷 · 耗时 118 ms</div>
+        </section>
+
+        <section class="side-card" data-od-id="defect-details">
+          <div class="panel-head"><strong>缺陷明细 <span class="mono">2</span></strong><button class="text-btn" id="exportBtn">导出标注图</button></div>
+          <div class="defect-table-wrap">
+            <table class="defect-table" aria-label="缺陷明细表">
+              <colgroup><col style="width:22%"><col style="width:27%"><col style="width:13%"><col style="width:13%"><col style="width:25%"></colgroup>
+              <thead>
+                <tr><th scope="col">缺陷名</th><th scope="col">缺陷坐标</th><th scope="col">长</th><th scope="col">宽</th><th scope="col">面积</th></tr>
+              </thead>
+              <tbody>
+                <tr class="defect-row active" data-defect="A" tabindex="0" role="button" aria-label="定位缺陷 D01：焊点连锡">
+                  <td><span class="defect-name"><strong>焊点连锡</strong><span class="defect-id">D01</span></span></td>
+                  <td class="defect-coordinate">X 632<br>Y 1148</td>
+                  <td class="defect-measure">76<br>px</td>
+                  <td class="defect-measure">64<br>px</td>
+                  <td class="defect-measure">4,864<br>px²</td>
+                </tr>
+                <tr class="defect-row" data-defect="B" tabindex="0" role="button" aria-label="定位缺陷 D02：元件偏移">
+                  <td><span class="defect-name"><strong>元件偏移</strong><span class="defect-id">D02</span></span></td>
+                  <td class="defect-coordinate">X 1784<br>Y 426</td>
+                  <td class="defect-measure">184<br>px</td>
+                  <td class="defect-measure">124<br>px</td>
+                  <td class="defect-measure">22,816<br>px²</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="side-card" data-od-id="shift-output">
+          <h2>当前班次产量</h2>
+          <div class="stats-grid">
+            <div class="stat"><span>检测总数</span><strong>1,286</strong></div>
+            <div class="stat ok"><span>OK</span><strong>1,269</strong></div>
+            <div class="stat ng"><span>NG</span><strong>17</strong></div>
+            <div class="stat"><span>节拍</span><strong>2.4s</strong></div>
+          </div>
+          <div class="yield">
+            <div class="yield-head"><span>直通率</span><strong class="mono">98.7%</strong></div>
+            <div class="progress"><span></span></div>
+          </div>
+        </section>
+
+      </aside>
+    </div>
+
+    <footer class="statusbar" data-od-id="system-status">
+      <div class="device-state">
+        <span class="state-item"><i class="state-dot"></i>相机已连接</span>
+        <span class="state-item"><i class="state-dot"></i>PLC 正常</span>
+        <span class="state-item"><i class="state-dot warn"></i>磁盘剩余 128 GB</span>
+      </div>
+      <div><span id="systemState">系统就绪</span> · <span id="clock">2026-06-29 09:46:31</span></div>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      const runBtn = document.getElementById('runBtn');
+      const runText = document.getElementById('runText');
+      const runIcon = document.getElementById('runIcon');
+      const systemState = document.getElementById('systemState');
+      const cameraStatus = document.getElementById('cameraStatus');
+      const resultValue = document.getElementById('resultValue');
+      const resultNote = document.getElementById('resultNote');
+      const productId = document.getElementById('productId');
+      const scene = document.getElementById('pcbScene');
+      const zoomValue = document.getElementById('zoomValue');
+      const toast = document.getElementById('toast');
+      let running = false;
+      let zoom = 1;
+      let toastTimer;
+
+      const notify = (message) => {
+        toast.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+      };
+
+      const addLog = (message, strong = false) => {
+        const time = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+        const row = document.createElement('div');
+        row.className = 'log-row';
+        row.innerHTML = `<span class="log-time">${time}</span><${strong ? 'strong' : 'span'}>${message}</${strong ? 'strong' : 'span'}>`;
+        document.getElementById('logList').prepend(row);
+      };
+
+      const setZoom = (next) => {
+        zoom = Math.min(1.5, Math.max(.7, next));
+        scene.style.transform = `scale(${zoom})`;
+        zoomValue.textContent = `${Math.round(zoom * 100)}%`;
+      };
+
+      const selectDefect = (key) => {
+        document.querySelectorAll('.defect-row').forEach(row => row.classList.toggle('active', row.dataset.defect === key));
+        document.querySelector('#defectA .defect-box').classList.toggle('active', key === 'A');
+        document.querySelector('#defectB .defect-box').classList.toggle('active', key === 'B');
+        notify(key === 'A' ? '已定位 D01：焊点连锡' : '已定位 D02：元件偏移');
+      };
+
+      runBtn.addEventListener('click', () => {
+        running = !running;
+        runText.textContent = running ? '停止检测' : '开始检测';
+        runIcon.innerHTML = running ? '<path d="M7 6h4v12H7zm6 0h4v12h-4z"/>' : '<path d="m8 5 11 7-11 7z"/>';
+        systemState.textContent = running ? '连续检测中' : '系统就绪';
+        cameraStatus.textContent = running ? 'CAM-01 · 采集中' : 'CAM-01 · 实时';
+        addLog(running ? '连续检测已启动' : '连续检测已停止', true);
+        notify(running ? '已启动连续检测' : '检测已安全停止');
+      });
+
+      document.getElementById('snapshotBtn').addEventListener('click', () => {
+        productId.textContent = `PCB${new Date().toISOString().slice(2,10).replaceAll('-', '')}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
+        resultValue.textContent = '检测中';
+        resultValue.classList.remove('ok');
+        resultNote.textContent = '正在执行缺陷识别…';
+        addLog('手动采图完成，开始执行算法');
+        setTimeout(() => {
+          resultValue.textContent = 'NG';
+          resultNote.textContent = '发现 2 处缺陷 · 耗时 121 ms';
+          addLog('检测完成：判定 NG，发现 2 处缺陷', true);
+        }, 850);
+      });
+
+      document.querySelectorAll('.defect-row').forEach(row => row.addEventListener('click', () => selectDefect(row.dataset.defect)));
+      document.querySelectorAll('.defect-row').forEach(row => row.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          selectDefect(row.dataset.defect);
+        }
+      }));
+      document.getElementById('defectA').addEventListener('click', () => selectDefect('A'));
+      document.getElementById('defectB').addEventListener('click', () => selectDefect('B'));
+      document.getElementById('zoomOut').addEventListener('click', () => setZoom(zoom - .1));
+      document.getElementById('zoomIn').addEventListener('click', () => setZoom(zoom + .1));
+      document.getElementById('zoomReset').addEventListener('click', () => setZoom(1));
+
+      document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', () => {
+        if (item.dataset.page !== '实时检测') {
+          notify(`${item.dataset.page}模块将在对应页面中打开`);
+          return;
+        }
+        document.querySelectorAll('.nav-item').forEach(node => node.classList.remove('active'));
+        item.classList.add('active');
+      }));
+
+      document.getElementById('clearLog').addEventListener('click', () => {
+        document.getElementById('logList').innerHTML = '';
+        notify('运行日志视图已清空');
+      });
+      document.getElementById('exportBtn').addEventListener('click', () => notify('标注图已保存至默认导出目录'));
+
+      const updateClock = () => {
+        const now = new Date();
+        document.getElementById('clock').textContent = now.toLocaleString('zh-CN', { hour12: false }).replaceAll('/', '-');
+      };
+      updateClock();
+      setInterval(updateClock, 1000);
+    })();
+  </script>
+</body>
+</html>

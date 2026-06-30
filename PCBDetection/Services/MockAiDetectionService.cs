@@ -5,13 +5,15 @@ namespace PCBDetection.Services;
 
 public sealed class MockAiDetectionService : IAiDetectionService
 {
-    public string Status { get; private set; } = "Not initialized";
+    public bool Status { get; private set; } = false;
 
-    public Task<DeviceStatus> InitializeAsync(RecipeProfile recipe, CancellationToken cancellationToken)
+    public Task InitializeAsync(RecipeProfile recipe, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        Status = "Ready";
-        return Task.FromResult(new DeviceStatus("AI", Status, $"Mock model loaded for {recipe.RecipeName}"));
+        return Task.Run(() =>
+        {
+            Status = true;
+        });
     }
 
     public Task<InspectionResult> DetectAsync(InspectionRequest request, CancellationToken cancellationToken)
@@ -28,9 +30,11 @@ public sealed class MockAiDetectionService : IAiDetectionService
             "Mock AI detection passed"));
     }
 
-    public Task<DeviceStatus> ReleaseAsync()
+    public Task ReleaseAsync()
     {
-        Status = "Released";
-        return Task.FromResult(new DeviceStatus("AI", Status));
+        return Task.Run(() =>
+        {
+            Status = false;
+        });
     }
 }

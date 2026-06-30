@@ -1,0 +1,33 @@
+<UserControl x:Class="PCBDetection.Views.ProductionStatisticsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:prism="http://prismlibrary.com/"
+             prism:ViewModelLocator.AutoWireViewModel="True">
+    <Grid Margin="20">
+        <Border Style="{StaticResource PanelStyle}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="620">
+                <TextBlock Text="&#xE9D2;"
+                           FontFamily="Segoe MDL2 Assets"
+                           FontSize="48"
+                           Foreground="{StaticResource PrimaryBrush}"
+                           HorizontalAlignment="Center" />
+                <TextBlock Text="{Binding Title}"
+                           FontSize="26"
+                           FontWeight="Bold"
+                           HorizontalAlignment="Center"
+                           Margin="0,20,0,8" />
+                <TextBlock Text="{Binding Description}"
+                           Foreground="{StaticResource MutedTextBrush}"
+                           FontSize="14"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap" />
+                <Border Style="{StaticResource PlaceholderNoticeStyle}">
+                    <TextBlock Text="Page structure ready · Charts and report filters will be added with reporting requirements."
+                               Foreground="#475467"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap" />
+                </Border>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

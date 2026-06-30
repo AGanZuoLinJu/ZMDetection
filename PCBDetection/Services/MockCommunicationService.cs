@@ -28,21 +28,26 @@ public abstract class MockCommunicationService : ICommunicationService
 
     public string Name { get; }
 
-    public string ConnectionStatus { get; private set; } = "Offline";
+    public bool ConnectionStatus { get; private set; } = false;
 
-    public Task<DeviceStatus> ConnectAsync(CancellationToken cancellationToken)
+    public Task ConnectAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        ConnectionStatus = "Online";
-        MessageReceived?.Invoke(this, $"{Name} mock connected");
-        return Task.FromResult(new DeviceStatus(Name, ConnectionStatus));
+        ConnectionStatus = true;
+        return Task.Run(async () =>
+        {
+            await Task.Delay(1000);
+        },cancellationToken);
     }
 
-    public Task<DeviceStatus> DisconnectAsync(CancellationToken cancellationToken)
+    public Task DisconnectAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        ConnectionStatus = "Offline";
-        return Task.FromResult(new DeviceStatus(Name, ConnectionStatus));
+        ConnectionStatus = false;
+        return Task.Run(async () =>
+        {
+            await Task.Delay(1000);
+        }, cancellationToken);
     }
 
     public Task SendAsync(string message, CancellationToken cancellationToken)

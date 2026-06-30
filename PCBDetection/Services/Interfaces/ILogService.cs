@@ -6,6 +6,8 @@ public interface ILogService
 {
     event EventHandler<LogItem>? LogAdded;
 
+    IReadOnlyList<LogItem> History { get; }
+
     void Info(string message);
 
     void Warning(string message);

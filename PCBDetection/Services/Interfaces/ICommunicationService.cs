@@ -8,11 +8,11 @@ public interface ICommunicationService
 
     string Name { get; }
 
-    string ConnectionStatus { get; }
+    bool ConnectionStatus { get; }
 
-    Task<DeviceStatus> ConnectAsync(CancellationToken cancellationToken);
+    Task ConnectAsync(CancellationToken cancellationToken);
 
-    Task<DeviceStatus> DisconnectAsync(CancellationToken cancellationToken);
+    Task DisconnectAsync(CancellationToken cancellationToken);
 
     Task SendAsync(string message, CancellationToken cancellationToken);
 }

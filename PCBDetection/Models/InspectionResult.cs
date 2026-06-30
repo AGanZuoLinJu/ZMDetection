@@ -10,7 +10,8 @@ public sealed class InspectionResult
         string recipeName = "",
         string panelId = "",
         string imagePath = "",
-        string message = "")
+        string message = "",
+        IReadOnlyList<DefectDetail>? defects = null)
     {
         BoardId = boardId;
         IsOk = isOk;
@@ -20,6 +21,7 @@ public sealed class InspectionResult
         PanelId = panelId;
         ImagePath = imagePath;
         Message = message;
+        Defects = defects ?? Array.Empty<DefectDetail>();
     }
 
     public string BoardId { get; }
@@ -37,4 +39,6 @@ public sealed class InspectionResult
     public string ImagePath { get; }
 
     public string Message { get; }
+
+    public IReadOnlyList<DefectDetail> Defects { get; }
 }

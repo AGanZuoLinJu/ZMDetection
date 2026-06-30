@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
+using PCBDetection.ViewModels;
 
 namespace PCBDetection.Views;
 
@@ -9,12 +10,23 @@ public partial class MainWindow : Window
     private const int MonitorDefaultToNearest = 0x00000002;
     private const int WmGetMinMaxInfo = 0x0024;
 
-    public MainWindow()
+    public MainWindow(MainWindowViewModel viewModel)
     {
         InitializeComponent();
+        DataContext = viewModel;
+
         SourceInitialized += OnSourceInitialized;
+        Loaded += OnLoaded;
         StateChanged += (_, _) => UpdateMaximizeButton();
         UpdateMaximizeButton();
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel viewModel)
+        {
+            viewModel.InitializeNavigation();
+        }
     }
 
     private void MinimizeButton_Click(object sender, RoutedEventArgs e)
@@ -27,9 +39,33 @@ public partial class MainWindow : Window
         ToggleWindowState();
     }
 
-    private void CloseButton_Click(object sender, RoutedEventArgs e)
+    private async void CloseButton_Click(object sender, RoutedEventArgs e)
     {
-        SystemCommands.CloseWindow(this);
+        var result = MessageBox.Show(
+            this,
+            "确定要关闭ZM-PCB检测平台吗？",
+            "关闭确认",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question,
+            MessageBoxResult.No);
+
+        if (result != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        if (sender is System.Windows.Controls.Button button)
+        {
+            button.IsEnabled = false;
+        }
+
+        if (Application.Current is App app)
+        {
+            await app.ShutdownApplicationAsync(this);
+            return;
+        }
+
+        Close();
     }
 
     private void ToggleWindowState()

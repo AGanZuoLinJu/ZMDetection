@@ -4,13 +4,13 @@ namespace PCBDetection.Services.Interfaces;
 
 public interface ILightService
 {
-    string Status { get; }
+    bool Status { get; }
 
-    Task<DeviceStatus> InitializeAsync(CancellationToken cancellationToken);
+    Task InitializeAsync(CancellationToken cancellationToken);
 
-    Task<DeviceStatus> TurnOnAsync(CancellationToken cancellationToken);
+    Task TurnOnAsync(CancellationToken cancellationToken);
 
-    Task<DeviceStatus> TurnOffAsync(CancellationToken cancellationToken);
+    Task TurnOffAsync(CancellationToken cancellationToken);
 
-    Task<DeviceStatus> ReleaseAsync();
+    Task ReleaseAsync();
 }

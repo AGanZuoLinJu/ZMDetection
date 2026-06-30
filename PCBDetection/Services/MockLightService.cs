@@ -1,3 +1,4 @@
+using System.Threading;
 using PCBDetection.Models;
 using PCBDetection.Services.Interfaces;
 
@@ -5,32 +6,49 @@ namespace PCBDetection.Services;
 
 public sealed class MockLightService : ILightService
 {
-    public string Status { get; private set; } = "Offline";
+    public bool Status { get; private set; } = false;
 
-    public Task<DeviceStatus> InitializeAsync(CancellationToken cancellationToken)
+    public Task InitializeAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        Status = "Ready";
-        return Task.FromResult(new DeviceStatus("Light", Status, "Mock light controller initialized"));
+        return Task.Run(() =>
+        {
+            Status = true;
+        },cancellationToken);
     }
 
-    public Task<DeviceStatus> TurnOnAsync(CancellationToken cancellationToken)
+    public Task TurnOnAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        Status = "On";
-        return Task.FromResult(new DeviceStatus("Light", Status));
+        return Task.Run(async () =>
+        {
+            if (Status)
+            {
+                await Task.Delay(100);
+            }
+        }, cancellationToken);
     }
 
-    public Task<DeviceStatus> TurnOffAsync(CancellationToken cancellationToken)
+    public Task TurnOffAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        Status = "Off";
-        return Task.FromResult(new DeviceStatus("Light", Status));
+        return Task.Run(async () =>
+        {
+            if (Status)
+            {
+                await Task.Delay(100);
+            }
+        }, cancellationToken);
     }
 
-    public Task<DeviceStatus> ReleaseAsync()
+    public Task ReleaseAsync()
     {
-        Status = "Released";
-        return Task.FromResult(new DeviceStatus("Light", Status));
+        return Task.Run(() =>
+        {
+            if (Status)
+            {
+                Status = false;
+            }
+        });
     }
 }

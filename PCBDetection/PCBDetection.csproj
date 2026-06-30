@@ -23,12 +23,7 @@
       <Private>true</Private>
     </Reference>
     <Reference Include="halcondotnet">
-      <HintPath>..\..\FSPCBDectection(20260102)\FSPCBDectection(20251108)\PCBDectection\DLL\halcondotnet.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
-    <Reference Include="halcondotnetxl">
-      <HintPath>..\..\FSPCBDectection(20260102)\FSPCBDectection(20251108)\PCBDectection\DLL\halcondotnetxl.dll</HintPath>
-      <Private>true</Private>
+      <HintPath>..\DLLs\halcondotnet.dll</HintPath>
     </Reference>
     <Reference Include="HslCommunication">
       <HintPath>..\..\FSPCBDectection(20260102)\FSPCBDectection(20251108)\PCBDectection\DLL\HslCommunication.dll</HintPath>
