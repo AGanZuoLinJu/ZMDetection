@@ -8,7 +8,7 @@ public sealed class StartupService : IStartupService
     private readonly IRecipeService recipeService;
     private readonly ICameraService cameraService;
     private readonly ILightService lightService;
-    private readonly IAiDetectionService aiDetectionService;
+    private readonly IDetectionService aiDetectionService;
     private readonly IPlcService plcService;
     private readonly IMesService mesService;
     private readonly IInspectionWorkflowService workflowService;
@@ -20,7 +20,7 @@ public sealed class StartupService : IStartupService
         IRecipeService recipeService,
         ICameraService cameraService,
         ILightService lightService,
-        IAiDetectionService aiDetectionService,
+        IDetectionService aiDetectionService,
         IPlcService plcService,
         IMesService mesService,
         IInspectionWorkflowService workflowService,

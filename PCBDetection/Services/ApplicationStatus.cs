@@ -10,6 +10,7 @@ public sealed class ApplicationStatus : BindableBase, IApplicationStatus
     private bool mesStatus = false;
     private bool lightStatus = false;
     private bool aiStatus = false;
+    private bool isInspectionRunning;
     private string currentRecipe = "PCB_TOP_AOI_V1";
 
     public bool CameraStatus
@@ -42,6 +43,12 @@ public sealed class ApplicationStatus : BindableBase, IApplicationStatus
         private set => SetProperty(ref aiStatus, value);
     }
 
+    public bool IsInspectionRunning
+    {
+        get => isInspectionRunning;
+        private set => SetProperty(ref isInspectionRunning, value);
+    }
+
     public string CurrentRecipe
     {
         get => currentRecipe;
@@ -53,5 +60,6 @@ public sealed class ApplicationStatus : BindableBase, IApplicationStatus
     public void SetMesStatus(bool value) => MesStatus = value;
     public void SetLightStatus(bool value) => LightStatus = value;
     public void SetAiStatus(bool value) => AiStatus = value;
+    public void SetInspectionRunning(bool value) => IsInspectionRunning = value;
     public void SetCurrentRecipe(string value) => CurrentRecipe = value;
 }

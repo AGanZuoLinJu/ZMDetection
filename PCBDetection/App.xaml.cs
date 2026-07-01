@@ -58,7 +58,7 @@ public partial class App : PrismApplication
 
         try
         {
-            Container.Resolve<ILogService>().Info("软件正在初始化.");
+            Container.Resolve<ILogService>().Info("软件正在启动.");
             loadingWindow.Show();
             await loadingViewModel.InitializeAsync(startupCancellation.Token);
             startupCancellation.Token.ThrowIfCancellationRequested();
@@ -75,7 +75,7 @@ public partial class App : PrismApplication
         }
         catch (Exception ex)
         {
-            Container.Resolve<ILogService>().Error($"Unexpected startup failure: {ex.Message}");
+            Container.Resolve<ILogService>().Error($"软件启动失败: {ex.Message}");
             Shutdown();
         }
     }
@@ -113,7 +113,7 @@ public partial class App : PrismApplication
         }
         catch (Exception ex)
         {
-            Container.Resolve<ILogService>().Error($"Unexpected shutdown failure: {ex.Message}");
+            Container.Resolve<ILogService>().Error($"软件关闭错误: {ex.Message}");
         }
         finally
         {
@@ -125,15 +125,10 @@ public partial class App : PrismApplication
 
     protected override void RegisterTypes(IContainerRegistry containerRegistry)
     {
-        containerRegistry.Register<MainWindow>();
-        containerRegistry.Register<MainWindowViewModel>();
-        containerRegistry.Register<LoadingWindow>();
-        containerRegistry.Register<LoadingWindowViewModel>();
-
         containerRegistry.RegisterSingleton<ILogService, LogService>();
         containerRegistry.RegisterSingleton<ICameraService, MockCameraService>();
         containerRegistry.RegisterSingleton<IInspectionService, MockInspectionService>();
-        containerRegistry.RegisterSingleton<IAiDetectionService, MockAiDetectionService>();
+        containerRegistry.RegisterSingleton<IDetectionService, MockAiDetectionService>();
         containerRegistry.RegisterSingleton<IRecipeService, RecipeService>();
         containerRegistry.RegisterSingleton<ILightService, MockLightService>();
         containerRegistry.RegisterSingleton<IPlcService, MockPlcService>();
@@ -147,7 +142,6 @@ public partial class App : PrismApplication
         containerRegistry.RegisterForNavigation<DetectionView, DetectionViewModel>("DetectionView");
         containerRegistry.RegisterForNavigation<ParameterSettingsView, ParameterSettingsViewModel>("ParameterSettingsView");
         containerRegistry.RegisterForNavigation<ProductionStatisticsView, ProductionStatisticsViewModel>("ProductionStatisticsView");
-        containerRegistry.RegisterForNavigation<DeviceManagementView, DeviceManagementViewModel>("DeviceManagementView");
         containerRegistry.RegisterForNavigation<SystemSettingsView, SystemSettingsViewModel>("SystemSettingsView");
     }
 }

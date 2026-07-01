@@ -11,10 +11,14 @@ namespace PCBDetection.ViewModels;
 
 public sealed class DetectionViewModel : BindableBase
 {
+    #region <<<Services
     private readonly IInspectionWorkflowService workflowService;
     private readonly IInspectionService inspectionService;
     private readonly IProductionStatisticsService statisticsService;
     private readonly ILogService logService;
+    #endregion
+
+    private readonly IApplicationStatus applicationStatus;
     private CancellationTokenSource? runCancellation;
     private string inspectionResult = "NA";
     private string currentBoardId = "--";
@@ -36,11 +40,13 @@ public sealed class DetectionViewModel : BindableBase
         this.inspectionService = inspectionService;
         this.statisticsService = statisticsService;
         this.logService = logService;
+        this.applicationStatus = applicationStatus;
 
         CurrentRecipe = applicationStatus.CurrentRecipe;
         previewMessage = "Camera preview is waiting for inspection.";
 
         ToggleInspectionCommand = new DelegateCommand(async () => await ToggleInspectionAsync());
+        ClearLogViewCommand = new DelegateCommand(() => LogItems.Clear());
 
         inspectionService.InspectionCompleted += OnInspectionCompleted;
         foreach (var item in logService.History.Reverse())
@@ -78,7 +84,6 @@ public sealed class DetectionViewModel : BindableBase
             }
         }
     }
-
     public string PreviewMessage
     {
         get => previewMessage;
@@ -142,7 +147,7 @@ public sealed class DetectionViewModel : BindableBase
     public DelegateCommand ToggleInspectionCommand { get; }
     public ObservableCollection<LogItem> LogItems { get; } = new();
     public ObservableCollection<DefectDetail> Defects { get; } = new();
-
+    public DelegateCommand ClearLogViewCommand { get; }
     private async Task ToggleInspectionAsync()
     {
         if (!IsRunning)
@@ -165,17 +170,22 @@ public sealed class DetectionViewModel : BindableBase
         }
     }
     int i = 0;
+    /// <summary>
+    /// 开始运行检测服务
+    /// </summary>
+    /// <returns></returns>
     private async Task StartInspectionAsync()
     {
         runCancellation?.Cancel();
         var cancellation = new CancellationTokenSource();
         runCancellation = cancellation;
         IsRunning = true;
-        logService.Info("开始检测.");
+        applicationStatus.SetInspectionRunning(true);
+        logService.Info("检测开始运行...");
 
         try
         {
-            while (!cancellation.Token.IsCancellationRequested)
+            while (applicationStatus.IsInspectionRunning && !cancellation.Token.IsCancellationRequested)
             {
                 var result = await workflowService.RunSingleAsync(cancellation.Token);
                 ApplyResult(result);
@@ -201,6 +211,7 @@ public sealed class DetectionViewModel : BindableBase
         }
         finally
         {
+            applicationStatus.SetInspectionRunning(false);
             IsRunning = false;
             if (ReferenceEquals(runCancellation, cancellation))
             {
@@ -210,12 +221,17 @@ public sealed class DetectionViewModel : BindableBase
             cancellation.Dispose();
         }
     }
+    /// <summary>
+    /// 停止检测服务
+    /// </summary>
+    /// <returns></returns>
     private async Task StopInspectionAsync()
     {
+        applicationStatus.SetInspectionRunning(false);
         runCancellation?.Cancel();
         await workflowService.StopAsync();
         IsRunning = false;
-        logService.Warning("软件停止运行");
+        logService.Warning("检测停止运行...");
     }
     private void ApplyResult(InspectionResult result)
     {
@@ -235,7 +251,6 @@ public sealed class DetectionViewModel : BindableBase
             logService.Defect($"{result.BoardId} has {result.DefectCount} defects.");
         }
     }
-
     private void ApplyStatistics(ProductionStatisticsSnapshot snapshot)
     {
         OkCount = snapshot.OkCount;
@@ -243,7 +258,6 @@ public sealed class DetectionViewModel : BindableBase
         CycleTime = snapshot.LastCycleTimeMilliseconds;
         RaisePropertyChanged(nameof(YieldRate));
     }
-
     private void OnInspectionCompleted(object? sender, InspectionResult result)
     {
         PreviewMessage = string.IsNullOrWhiteSpace(result.ImagePath)

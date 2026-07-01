@@ -14,6 +14,8 @@ public interface IApplicationStatus : INotifyPropertyChanged
 
     bool AiStatus { get; }
 
+    bool IsInspectionRunning { get; }
+
     string CurrentRecipe { get; }
 
     void SetCameraStatus(bool value);
@@ -25,6 +27,8 @@ public interface IApplicationStatus : INotifyPropertyChanged
     void SetLightStatus(bool value);
 
     void SetAiStatus(bool value);
+
+    void SetInspectionRunning(bool value);
 
     void SetCurrentRecipe(string value);
 }

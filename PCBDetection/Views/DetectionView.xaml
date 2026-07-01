@@ -75,12 +75,15 @@
                             <TextBlock Text="运行日志"
                                        FontWeight="SemiBold"
                                        VerticalAlignment="Center" />
-                            <TextBlock Text="清空"
-                                       Foreground="{StaticResource PrimaryBrush}"
-                                       FontSize="12"
-                                       HorizontalAlignment="Right"
-                                       VerticalAlignment="Center"
-                                       />
+                            <Button Content="清空"
+                                    FontSize="12"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Width="30"
+                                    Foreground="{StaticResource PrimaryBrush}"
+                                    Background="Transparent"
+                                    BorderBrush="Transparent"
+                                    Command="{Binding ClearLogViewCommand}"/>
                         </Grid>
                     </Border>
                     <ListBox Grid.Row="1"

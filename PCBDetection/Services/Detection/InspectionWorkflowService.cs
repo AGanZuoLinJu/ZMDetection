@@ -27,7 +27,11 @@ public sealed class InspectionWorkflowService : IInspectionWorkflowService
     }
 
     public bool IsRunning { get; private set; }
-
+    /// <summary>
+    /// ÷¥––ºÏ≤‚»ŒŒÒ
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public async Task<InspectionResult> RunSingleAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();

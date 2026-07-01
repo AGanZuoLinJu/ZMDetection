@@ -2,7 +2,7 @@ using PCBDetection.Models;
 
 namespace PCBDetection.Services.Interfaces;
 
-public interface IAiDetectionService
+public interface IDetectionService
 {
     bool Status { get; }
 

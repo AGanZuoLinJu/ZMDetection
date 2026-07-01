@@ -3,7 +3,7 @@ using PCBDetection.Services.Interfaces;
 
 namespace PCBDetection.Services;
 
-public sealed class MockAiDetectionService : IAiDetectionService
+public sealed class MockAiDetectionService : IDetectionService
 {
     public bool Status { get; private set; } = false;
 

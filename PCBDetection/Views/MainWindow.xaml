@@ -116,22 +116,15 @@
 
                     <TextBlock Text="配置"
                                Style="{StaticResource SidebarSectionLabelStyle}" />
-                    <RadioButton Content="检测方案"
+                    <RadioButton Content="参数设置"
                                  Tag="&#xE713;"
                                  GroupName="Navigation"
                                  IsChecked="{Binding IsParametersSelected, Mode=OneWay}"
                                  Command="{Binding NavigateCommand}"
                                  CommandParameter="ParameterSettingsView"
                                  Style="{StaticResource NavigationButtonStyle}" />
-                    <RadioButton Content="设备管理"
-                                 Tag="&#xE950;"
-                                 GroupName="Navigation"
-                                 IsChecked="{Binding IsDevicesSelected, Mode=OneWay}"
-                                 Command="{Binding NavigateCommand}"
-                                 CommandParameter="DeviceManagementView"
-                                 Style="{StaticResource NavigationButtonStyle}" />
                     <RadioButton Content="系统设置"
-                                 Tag="&#xE115;"
+                                 Tag="&#xE77B;"
                                  GroupName="Navigation"
                                  IsChecked="{Binding IsSystemSelected, Mode=OneWay}"
                                  Command="{Binding NavigateCommand}"

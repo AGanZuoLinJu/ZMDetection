@@ -1,4 +1,5 @@
 using System.Windows.Controls;
+using PCBDetection.ViewModels;
 
 namespace PCBDetection.Views;
 
