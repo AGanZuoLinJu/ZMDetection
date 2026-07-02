@@ -1,5 +1,4 @@
 using PCBDetection.Models;
-using PCBDetection.Services.Interfaces;
 using System.IO;
 
 namespace PCBDetection.Services;

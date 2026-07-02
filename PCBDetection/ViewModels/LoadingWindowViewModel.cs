@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using PCBDetection.Models;
-using PCBDetection.Services.Interfaces;
+using PCBDetection.Services;
 using Prism.Mvvm;
 
 namespace PCBDetection.ViewModels;
@@ -11,7 +11,7 @@ public sealed class LoadingWindowViewModel : BindableBase
     private string windowTitle = "ZM-PCB检测平台 - Initializing";
     private string operationDescription = "正在初始化视觉检测平台...";
     private double progressValue;
-    private string currentStep = "Starting";
+    private string currentStep = "启动中";
     private string statusMessage = "正在准备PCB检测平台...";
     private bool hasError;
 

@@ -1,7 +1,6 @@
 ﻿using System.Windows;
+using PCBDetection.Models;
 using PCBDetection.Services;
-using PCBDetection.Services.Detection;
-using PCBDetection.Services.Interfaces;
 using PCBDetection.ViewModels;
 using PCBDetection.Views;
 using Prism.DryIoc;
@@ -22,7 +21,6 @@ public partial class App : PrismApplication
     {
         return Container.Resolve<MainWindow>();
     }
-
     protected override void InitializeShell(Window shell)
     {
         ShutdownMode = ShutdownMode.OnExplicitShutdown;
@@ -44,7 +42,6 @@ public partial class App : PrismApplication
             Shutdown();
         };
     }
-
     protected override async void OnInitialized()
     {
         if (loadingWindow == null ||
@@ -58,7 +55,7 @@ public partial class App : PrismApplication
 
         try
         {
-            Container.Resolve<ILogService>().Info("软件正在启动.");
+            Container.Resolve<ILogService>().Info(LogCategory.Running,"软件正在启动.");
             loadingWindow.Show();
             await loadingViewModel.InitializeAsync(startupCancellation.Token);
             startupCancellation.Token.ThrowIfCancellationRequested();
@@ -75,11 +72,10 @@ public partial class App : PrismApplication
         }
         catch (Exception ex)
         {
-            Container.Resolve<ILogService>().Error($"软件启动失败: {ex.Message}");
+            Container.Resolve<ILogService>().Error(LogCategory.Running,$"软件启动失败: {ex.Message}");
             Shutdown();
         }
     }
-
     public async Task ShutdownApplicationAsync(Window mainWindow)
     {
         if (shutdownInProgress)
@@ -113,7 +109,9 @@ public partial class App : PrismApplication
         }
         catch (Exception ex)
         {
-            Container.Resolve<ILogService>().Error($"软件关闭错误: {ex.Message}");
+            Container.Resolve<ILogService>().Error(
+                LogCategory.Running,
+                $"软件关闭错误: {ex.Message}");
         }
         finally
         {
@@ -122,27 +120,44 @@ public partial class App : PrismApplication
             Shutdown();
         }
     }
-
     protected override void RegisterTypes(IContainerRegistry containerRegistry)
     {
+        //日志模块
         containerRegistry.RegisterSingleton<ILogService, LogService>();
-        containerRegistry.RegisterSingleton<ICameraService, MockCameraService>();
+
+        //相机模块 这里手动创建实例
+        ICameraService cam1 = new MockCameraService();
+        ICameraManager cameraManager = new CameraManager(new[]
+        {   
+            cam1
+        },Container.Resolve<ILogService>());
+        containerRegistry.RegisterInstance<ICameraManager>(cameraManager);
+
+        //通讯
+        containerRegistry.RegisterSingleton<ITCPServerService, TCPServerService>();
+        containerRegistry.RegisterSingleton<ITCPClientService, TCPClientService>();
+
         containerRegistry.RegisterSingleton<IInspectionService, MockInspectionService>();
-        containerRegistry.RegisterSingleton<IDetectionService, MockAiDetectionService>();
+        containerRegistry.RegisterSingleton<IAIDetectionService, MockAiDetectionService>();
         containerRegistry.RegisterSingleton<IRecipeService, RecipeService>();
         containerRegistry.RegisterSingleton<ILightService, MockLightService>();
-        containerRegistry.RegisterSingleton<IPlcService, MockPlcService>();
-        containerRegistry.RegisterSingleton<IMesService, MockMesService>();
+
         containerRegistry.RegisterSingleton<IProductionStatisticsService, ProductionStatisticsService>();
         containerRegistry.RegisterSingleton<IInspectionWorkflowService, InspectionWorkflowService>();
         containerRegistry.RegisterSingleton<IApplicationStatus, ApplicationStatus>();
         containerRegistry.RegisterSingleton<IStartupService, StartupService>();
+
+        //用户登录相关
+        containerRegistry.RegisterSingleton<IAuthenticationService, AuthenticationService>();
+        containerRegistry.RegisterSingleton<IUserSession, UserSession>();
+        containerRegistry.RegisterSingleton<ILoginDialogService, LoginDialogService>();
 
         //页面注册
         containerRegistry.RegisterForNavigation<DetectionView, DetectionViewModel>("DetectionView");
         containerRegistry.RegisterForNavigation<ParameterSettingsView, ParameterSettingsViewModel>("ParameterSettingsView");
         containerRegistry.RegisterForNavigation<ProductionStatisticsView, ProductionStatisticsViewModel>("ProductionStatisticsView");
         containerRegistry.RegisterForNavigation<SystemSettingsView, SystemSettingsViewModel>("SystemSettingsView");
+        containerRegistry.RegisterForNavigation<SinmulationTestView, SinmulationTestViewModel>("SinmulationTestView");
     }
 }
 

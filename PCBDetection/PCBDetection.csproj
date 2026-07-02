@@ -18,41 +18,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="DALSA.SaperaLT.SapClassBasic">
-      <HintPath>..\..\FSPCBDectection(20260102)\FSPCBDectection(20251108)\PCBDectection\DLL\DALSA.SaperaLT.SapClassBasic.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
     <Reference Include="halcondotnet">
       <HintPath>..\DLLs\halcondotnet.dll</HintPath>
     </Reference>
-    <Reference Include="HslCommunication">
-      <HintPath>..\..\FSPCBDectection(20260102)\FSPCBDectection(20251108)\PCBDectection\DLL\HslCommunication.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
     <Reference Include="MvCameraControl.Net">
-      <HintPath>..\..\FSPCBDectection(20260102)\FSPCBDectection(20251108)\PCBDectection\DLL\MvCameraControl.Net.dll</HintPath>
-      <Private>true</Private>
+      <HintPath>..\DLLs\MvCameraControl.Net.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\FSPCBDectection(20260102)\FSPCBDectection(20251108)\PCBDectection\DLL\Newtonsoft.Json.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
-    <Reference Include="OpenCvSharp">
-      <HintPath>..\..\FSPCBDectection(20260102)\FSPCBDectection(20251108)\PCBDectection\DLL\OpenCvSharp.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
-    <Reference Include="OpenCvSharp.Extensions">
-      <HintPath>..\..\FSPCBDectection(20260102)\FSPCBDectection(20251108)\PCBDectection\DLL\OpenCvSharp.Extensions.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
-    <Reference Include="teAiFlowEngine_CSharp">
-      <HintPath>..\..\FSPCBDectection(20260102)\FSPCBDectection(20251108)\PCBDectection\DLL\teAiFlowEngine_CSharp.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Core\" />
   </ItemGroup>
 
 </Project>

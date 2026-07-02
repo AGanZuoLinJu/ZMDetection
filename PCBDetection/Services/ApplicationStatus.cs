@@ -1,4 +1,3 @@
-using PCBDetection.Services.Interfaces;
 using Prism.Mvvm;
 
 namespace PCBDetection.Services;
@@ -9,7 +8,7 @@ public sealed class ApplicationStatus : BindableBase, IApplicationStatus
     private bool plcStatus = false;
     private bool mesStatus = false;
     private bool lightStatus = false;
-    private bool aiStatus = false;
+    private bool detectionStatus = false;
     private bool isInspectionRunning;
     private string currentRecipe = "PCB_TOP_AOI_V1";
 
@@ -37,10 +36,10 @@ public sealed class ApplicationStatus : BindableBase, IApplicationStatus
         private set => SetProperty(ref lightStatus, value);
     }
 
-    public bool AiStatus
+    public bool DetectionStatus
     {
-        get => aiStatus;
-        private set => SetProperty(ref aiStatus, value);
+        get => detectionStatus;
+        private set => SetProperty(ref detectionStatus, value);
     }
 
     public bool IsInspectionRunning
@@ -59,7 +58,7 @@ public sealed class ApplicationStatus : BindableBase, IApplicationStatus
     public void SetPlcStatus(bool value) => PlcStatus = value;
     public void SetMesStatus(bool value) => MesStatus = value;
     public void SetLightStatus(bool value) => LightStatus = value;
-    public void SetAiStatus(bool value) => AiStatus = value;
+    public void SetDetectionStatus(bool value) => DetectionStatus = value;
     public void SetInspectionRunning(bool value) => IsInspectionRunning = value;
     public void SetCurrentRecipe(string value) => CurrentRecipe = value;
 }

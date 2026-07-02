@@ -57,7 +57,7 @@
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center" />
                     </Border>
-                    <TextBlock Text="ZM-PCB检测平台"
+                    <TextBlock Text="{Binding ApplicationTitle}"
                                FontWeight="SemiBold"
                                VerticalAlignment="Center" />
                     <TextBlock Text="v1.0.0"
@@ -123,13 +123,18 @@
                                  Command="{Binding NavigateCommand}"
                                  CommandParameter="ParameterSettingsView"
                                  Style="{StaticResource NavigationButtonStyle}" />
-                    <RadioButton Content="系统设置"
-                                 Tag="&#xE77B;"
+                    <RadioButton Content="仿真测试"
+                                 Tag="&#xEC57;"
                                  GroupName="Navigation"
-                                 IsChecked="{Binding IsSystemSelected, Mode=OneWay}"
+                                 IsChecked="{Binding IsSinmulationTestSelected, Mode=OneWay}"
                                  Command="{Binding NavigateCommand}"
-                                 CommandParameter="SystemSettingsView"
+                                 CommandParameter="SinmulationTestView"
                                  Style="{StaticResource NavigationButtonStyle}" />
+                    <Button Content="系统登录"
+                            Tag="&#xE77B;"
+                            Command="{Binding LoginCommand}"
+                            Style="{StaticResource NavigationActionButtonStyle}" />
+
                 </StackPanel>
 
                 <Grid Grid.Row="1"
@@ -148,7 +153,7 @@
                                 Height="32"
                                 Background="#F1F1F1"
                                 CornerRadius="16">
-                            <TextBlock Text="管"
+                            <TextBlock Text="{Binding UserSession.AvatarText}"
                                        FontWeight="SemiBold"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center" />
@@ -156,10 +161,10 @@
                         <StackPanel Grid.Column="1"
                                     Margin="8,0,0,0"
                                     VerticalAlignment="Center">
-                            <TextBlock Text="管理员"
+                            <TextBlock Text="{Binding UserSession.DisplayName}"
                                        FontWeight="SemiBold"
                                        FontSize="13" />
-                            <TextBlock Text="设备维护权限"
+                            <TextBlock Text="{Binding UserSession.PermissionDescription}"
                                        Foreground="{StaticResource MutedTextBrush}"
                                        FontSize="10" />
                         </StackPanel>
@@ -200,12 +205,12 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal"
                             Margin="16,0,0,0"
-                            ToolTip="{Binding Status.AiStatus}">
-                    <TextBlock Text="AI" Style="{StaticResource StatusTextStyle}" />
+                            ToolTip="{Binding Status.DetectionStatus}">
+                    <TextBlock Text="检测" Style="{StaticResource StatusTextStyle}" />
                     <Ellipse Width="8"
                              Height="8"
                              Margin="6,0,0,0"
-                             Fill="{Binding Status.AiStatus, Converter={StaticResource ConnectionStatusToBrushConverter}}" />
+                             Fill="{Binding Status.DetectionStatus, Converter={StaticResource ConnectionStatusToBrushConverter}}" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal"
                             Margin="16,0,0,0"

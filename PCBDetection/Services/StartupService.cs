@@ -1,41 +1,49 @@
 ﻿using PCBDetection.Models;
-using PCBDetection.Services.Interfaces;
 
 namespace PCBDetection.Services;
 
 public sealed class StartupService : IStartupService
 {
+    private const string PlcIpAddress = "127.0.0.1";
+    private const int PlcPort = 5000;
+    private const int MesListenPort = 6000;
+
     private readonly IRecipeService recipeService;
-    private readonly ICameraService cameraService;
+    private readonly ICameraManager cameraManager;
     private readonly ILightService lightService;
-    private readonly IDetectionService aiDetectionService;
-    private readonly IPlcService plcService;
-    private readonly IMesService mesService;
+    private readonly IInspectionService inspectionService;
     private readonly IInspectionWorkflowService workflowService;
+    private readonly ITCPClientService plcClientService;
+    private readonly ITCPServerService mesServerService;
     private readonly IApplicationStatus applicationStatus;
     private readonly ILogService logService;
+    private readonly IAuthenticationService authenticationService;
     private bool initialized;
 
     public StartupService(
         IRecipeService recipeService,
-        ICameraService cameraService,
+        ICameraManager cameraManager,
         ILightService lightService,
-        IDetectionService aiDetectionService,
-        IPlcService plcService,
-        IMesService mesService,
+        IInspectionService inspectionService,
         IInspectionWorkflowService workflowService,
+        ITCPClientService plcClientService,
+        ITCPServerService mesServerService,
         IApplicationStatus applicationStatus,
-        ILogService logService)
+        ILogService logService,
+        IAuthenticationService authenticationService)
     {
         this.recipeService = recipeService;
-        this.cameraService = cameraService;
+        this.cameraManager = cameraManager;
         this.lightService = lightService;
-        this.aiDetectionService = aiDetectionService;
-        this.plcService = plcService;
-        this.mesService = mesService;
+        this.inspectionService = inspectionService;
         this.workflowService = workflowService;
+        this.plcClientService = plcClientService;
+        this.mesServerService = mesServerService;
         this.applicationStatus = applicationStatus;
         this.logService = logService;
+        this.authenticationService = authenticationService;
+
+        plcClientService.ConnectionStatusChanged += OnPlcConnectionStatusChanged;
     }
     /// <summary>
     /// 初始化各个模块
@@ -51,13 +59,27 @@ public sealed class StartupService : IStartupService
             return;
         }
 
-        progress.Report(new StartupProgress(0, "Starting", "Preparing system services..."));
-        //初始化机种
-        await RunStepAsync(12,"Recipe",async () =>
+        progress.Report(new StartupProgress(0, "Starting", "正在启动检测系统..."));
+        //初始化本地用户配置
+        await RunStepAsync(
+            8,
+            "用户配置",
+            async () =>
+            {
+                await authenticationService.InitializeAsync(cancellationToken);
+                return "用户配置加载完成";
+            },
+            progress,
+            cancellationToken);
+        //初始化机种参数
+        await RunStepAsync(
+            12,
+            "机种",
+            async () =>
             {
                 var recipe = await recipeService.LoadCurrentRecipeAsync(cancellationToken);
                 applicationStatus.SetCurrentRecipe(recipe.RecipeName);
-                return $"Recipe loaded: {recipe.RecipeName}";
+                return $"机种加载: {recipe.RecipeName}";
             },
             progress,
             cancellationToken);
@@ -65,12 +87,16 @@ public sealed class StartupService : IStartupService
         //初始化相机
         await RunStepAsync(
             30,
-            "Camera",
+            "相机模块",
             async () =>
             {
-                await cameraService.InitializeAsync(cancellationToken);
-                applicationStatus.SetCameraStatus(cameraService.ConnectionStatus);
-                return "正在初始化相机模块";
+                foreach (ICameraService camera in cameraManager.Cameras)
+                {
+                    await camera.InitializeAsync(cancellationToken);
+                }
+
+                applicationStatus.SetCameraStatus(cameraManager.Cameras.All(camera => camera.ConnectionStatus));
+                return $"相机模块初始化完成，共 {cameraManager.Cameras.Count} 台";
             },
             progress,
             cancellationToken);
@@ -78,7 +104,7 @@ public sealed class StartupService : IStartupService
         //初始化光源
         await RunStepAsync(
             46,
-            "Light",
+            "光源模块",
             async () =>
             {
                 await lightService.InitializeAsync(cancellationToken);
@@ -91,11 +117,11 @@ public sealed class StartupService : IStartupService
         //初始化检测模块
         await RunStepAsync(
             66,
-            "AI",
+            "检测模块",
             async () =>
             {
-                await aiDetectionService.InitializeAsync(recipeService.CurrentRecipe, cancellationToken);
-                applicationStatus.SetAiStatus(aiDetectionService.Status);
+                await inspectionService.InitializeAsync(recipeService.CurrentRecipe,cancellationToken);
+                applicationStatus.SetDetectionStatus(inspectionService.Status);
                 return "正在初始化检测模块";
             },
             progress,
@@ -107,9 +133,16 @@ public sealed class StartupService : IStartupService
             "PLC",
             async () =>
             {
-                await plcService.ConnectAsync(cancellationToken);
-                applicationStatus.SetPlcStatus(plcService.ConnectionStatus);
-                return "正在初始化PLC模块";
+                var connected = await plcClientService.ConnectAsync(PlcIpAddress, PlcPort);
+                applicationStatus.SetPlcStatus(plcClientService.IsConnected);
+
+                if (!connected)
+                {
+                    throw new InvalidOperationException(
+                        $"PLC TCP 连接失败: {PlcIpAddress}:{PlcPort}");
+                }
+
+                return $"PLC TCP 客户端已连接: {PlcIpAddress}:{PlcPort}";
             },
             progress,
             cancellationToken);
@@ -120,16 +153,16 @@ public sealed class StartupService : IStartupService
             "MES",
             async () =>
             {
-                await mesService.ConnectAsync(cancellationToken);
-                applicationStatus.SetMesStatus(mesService.ConnectionStatus);
-                return "正在初始化MES模块";
+                await mesServerService.StartListeningAsync(MesListenPort);
+                applicationStatus.SetMesStatus(mesServerService.IsListening);
+                return $"MES TCP 服务端已监听端口: {MesListenPort}";
             },
             progress,
             cancellationToken);
         await Task.Delay(500);
 
         initialized = true;
-        logService.Info("软件初始化完成");
+        logService.Info(LogCategory.Running, "软件初始化完成");
         progress.Report(new StartupProgress(100, "Ready", "软件初始化完成"));
     }
 
@@ -138,27 +171,31 @@ public sealed class StartupService : IStartupService
     /// </summary>
     public async Task ShutdownAsync(IProgress<StartupProgress> progress, CancellationToken cancellationToken)
     {
-        progress.Report(new StartupProgress(0, "Closing", "Preparing to release system services..."));
+        progress.Report(new StartupProgress(0, "Closing", "正在关闭检测系统..."));
 
         await RunShutdownStepAsync(
             12,
-            "停止运行工作流",
+            "检测流程",
             async () =>
             {
                 await workflowService.StopAsync();
-                return "正在停止运行工作流";
+                return "正在停止运行检测流程";
             },
             progress,
             cancellationToken);
 
         await RunShutdownStepAsync(
             32,
-            "相机",
+            "相机模块",
             async () =>
             {
-                await cameraService.StopGrabbingAsync(cancellationToken);
-                await cameraService.DisconnectAsync(cancellationToken);
-                applicationStatus.SetCameraStatus(cameraService.ConnectionStatus);
+                foreach (ICameraService camera in cameraManager.Cameras)
+                {
+                    await camera.StopGrabbingAsync(cancellationToken);
+                    await camera.DestroyCamera(cancellationToken);
+                }
+
+                applicationStatus.SetCameraStatus(cameraManager.Cameras.All(camera => camera.ConnectionStatus));
                 return "正在释放相机模块";
             },
             progress,
@@ -166,7 +203,7 @@ public sealed class StartupService : IStartupService
 
         await RunShutdownStepAsync(
             50,
-            "Light",
+            "光源模块",
             async () =>
             {
                 await lightService.TurnOffAsync(cancellationToken);
@@ -179,11 +216,11 @@ public sealed class StartupService : IStartupService
 
         await RunShutdownStepAsync(
             68,
-            "AI",
+            "检测模块",
             async () =>
             {
-                await aiDetectionService.ReleaseAsync();
-                applicationStatus.SetAiStatus(aiDetectionService.Status);
+                await inspectionService.ReleaseAsync();
+                applicationStatus.SetDetectionStatus(inspectionService.Status);
                 return "正在释放检测模块";
             },
             progress,
@@ -192,11 +229,11 @@ public sealed class StartupService : IStartupService
         await RunShutdownStepAsync(
             84,
             "PLC",
-            async () =>
+            () =>
             {
-                await plcService.DisconnectAsync(cancellationToken);
-                applicationStatus.SetPlcStatus(plcService.ConnectionStatus);
-                return "正在释放PLC模块";
+                plcClientService.Disconnect();
+                applicationStatus.SetPlcStatus(plcClientService.IsConnected);
+                return Task.FromResult("PLC TCP 客户端已断开");
             },
             progress,
             cancellationToken);
@@ -204,17 +241,17 @@ public sealed class StartupService : IStartupService
         await RunShutdownStepAsync(
             100,
             "MES",
-            async () =>
+            () =>
             {
-                await mesService.DisconnectAsync(cancellationToken);
-                applicationStatus.SetMesStatus(mesService.ConnectionStatus);
-                return "正在释放MES模块";
+                mesServerService.StopListening();
+                applicationStatus.SetMesStatus(mesServerService.IsListening);
+                return Task.FromResult("MES TCP 服务端已停止");
             },
             progress,
             cancellationToken);
 
         initialized = false;
-        logService.Info("软件退出");
+        logService.Info(LogCategory.Running, "软件退出");
         progress.Report(new StartupProgress(100, "Closed", "所有模块释放完成."));
     }
 
@@ -226,13 +263,13 @@ public sealed class StartupService : IStartupService
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        progress.Report(new StartupProgress(Math.Max(0, percentage - 10), step, $"Closing {step}..."));
+        progress.Report(new StartupProgress(Math.Max(0, percentage - 10), step, $"正在关闭 {step}..."));
 
         try
         {
             var message = await action();
             progress.Report(new StartupProgress(percentage, step, message));
-            logService.Info($"{step} closed: {message}");
+            logService.Info(LogCategory.Running, $"{step} closed: {message}");
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -240,8 +277,8 @@ public sealed class StartupService : IStartupService
         }
         catch (Exception ex)
         {
-            logService.Error($"{step} shutdown failed: {ex.Message}");
-            progress.Report(new StartupProgress(percentage, step, $"Failed to close {step}: {ex.Message}", true));
+            logService.Error(LogCategory.Running,$"{step} 关闭软件错误 : {ex.Message}");
+            progress.Report(new StartupProgress(percentage, step, $"关闭 {step} 错误 : {ex.Message}", true));
         }
 
         await Task.Delay(300, cancellationToken);
@@ -261,7 +298,7 @@ public sealed class StartupService : IStartupService
         {
             var message = await action();
             progress.Report(new StartupProgress(percentage, step, message));
-            logService.Info($"{step}: {message}");
+            logService.Info(LogCategory.Running, $"{step}: {message}");
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -269,9 +306,14 @@ public sealed class StartupService : IStartupService
         }
         catch (Exception ex)
         {
-            logService.Error($"{step} initialization failed: {ex.Message}");
-            progress.Report(new StartupProgress(percentage, step, $"{step} unavailable: {ex.Message}", true));
+            logService.Error(LogCategory.Running,$"{step} 初始化错误 : {ex.Message}");
+            progress.Report(new StartupProgress(percentage, step, $"{step} 未知错误 : {ex.Message}", true));
         }
+    }
+
+    private void OnPlcConnectionStatusChanged(object? sender, bool isConnected)
+    {
+        applicationStatus.SetPlcStatus(isConnected);
     }
 }
 

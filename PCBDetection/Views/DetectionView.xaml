@@ -55,7 +55,7 @@
                         x:Name="mainHalconWindow"
                         HKeepAspectRatio="True"
                         HDoubleClickToFitContent="True">
-                        <halcon:HIconicDisplayObjectWPF IconicObject="{Binding CurrentImage, Mode=OneWay}" />
+                        <halcon:HIconicDisplayObjectWPF IconicObject="{Binding DisplayMainImage, Mode=OneWay}" />
                     </halcon:HSmartWindowControlWPF>
                 </Border>
             </Grid>
@@ -72,7 +72,7 @@
                     <Border BorderBrush="{StaticResource BorderBrushSoft}"
                             BorderThickness="0,0,0,1">
                         <Grid Margin="14,0">
-                            <TextBlock Text="运行日志"
+                            <TextBlock Text="运行 / 通信日志"
                                        FontWeight="SemiBold"
                                        VerticalAlignment="Center" />
                             <Button Content="清空"
@@ -88,7 +88,7 @@
                     </Border>
                     <ListBox Grid.Row="1"
                              ItemsSource="{Binding LogItems}"
-                             Style="{StaticResource OperationLogListStyle}" />
+                             Style="{StaticResource OperationLogListStyle}"/>
                 </Grid>
             </Border>
         </Grid>

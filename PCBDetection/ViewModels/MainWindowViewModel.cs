@@ -1,5 +1,5 @@
 using System.Windows;
-using PCBDetection.Services.Interfaces;
+using PCBDetection.Services;
 using PCBDetection.Views;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -12,7 +12,7 @@ public sealed class MainWindowViewModel : BindableBase
     #region <<<界面导航相关
     private readonly IRegionManager regionManager;
     public const string MainRegionName = "MainContentRegion";                       //软件主区域
-    private string selectedPage = "DetectionView";                                  
+    private string selectedPage = "DetectionView";
     private string pageTitle = "检测界面";
     private bool navigationInitialized;
     //绑定属性 控制主界面页面导航按钮
@@ -20,6 +20,7 @@ public sealed class MainWindowViewModel : BindableBase
     public bool IsParametersSelected => SelectedPage == "ParameterSettingsView";
     public bool IsStatisticsSelected => SelectedPage == "ProductionStatisticsView";
     public bool IsSystemSelected => SelectedPage == "SystemSettingsView";
+    public bool IsSinmulationTestSelected => SelectedPage == "SinmulationTestView";
     /// <summary>
     /// 选中的页面
     /// </summary>
@@ -34,6 +35,7 @@ public sealed class MainWindowViewModel : BindableBase
                 RaisePropertyChanged(nameof(IsParametersSelected));
                 RaisePropertyChanged(nameof(IsStatisticsSelected));
                 RaisePropertyChanged(nameof(IsSystemSelected));
+                RaisePropertyChanged(nameof(IsSinmulationTestSelected));
             }
         }
     }
@@ -46,29 +48,43 @@ public sealed class MainWindowViewModel : BindableBase
     /// 导航切换命令
     /// </summary>
     public AsyncDelegateCommand<string> NavigateCommand { get; }
+    /// <summary>
+    /// 登录按钮命令
+    /// </summary>
+    public DelegateCommand LoginCommand { get; }
     #endregion
 
     #region <<<Services
     private readonly IInspectionWorkflowService workflowService;                    //检测流程服务
     private readonly IApplicationStatus applicationStatus;
+    private readonly IUserSession userSession;
+    private readonly ILoginDialogService loginDialogService;
     #endregion
 
     public MainWindowViewModel(
         IRegionManager regionManager,
         IApplicationStatus applicationStatus,
-        IInspectionWorkflowService workflowService)
+        IInspectionWorkflowService workflowService,
+        IUserSession userSession,
+        ILoginDialogService loginDialogService)
     {
         this.regionManager = regionManager;
         this.applicationStatus = applicationStatus;
         this.workflowService = workflowService;
+        this.userSession = userSession;
+        this.loginDialogService = loginDialogService;
         Status = applicationStatus;
+        UserSession = userSession;
         NavigateCommand = new AsyncDelegateCommand<string>(NavigateAsync);
+        LoginCommand = new DelegateCommand(() => loginDialogService.ShowDialog(Application.Current?.MainWindow));
+        userSession.SessionExpired += OnSessionExpired;
     }
     public string ApplicationTitle => "ZM-PCB检测平台";
     /// <summary>
     /// 软件状态
     /// </summary>
     public IApplicationStatus Status { get; }
+    public IUserSession UserSession { get; }
 
     #region <<<其他方法
     public void InitializeNavigation()
@@ -81,6 +97,11 @@ public sealed class MainWindowViewModel : BindableBase
         navigationInitialized = true;
         _ = NavigateAsync("DetectionView");
     }
+    /// <summary>
+    /// 切换页面
+    /// </summary>
+    /// <param name="target"></param>
+    /// <returns></returns>
     private async Task NavigateAsync(string? target)
     {
         if (string.IsNullOrWhiteSpace(target))
@@ -90,11 +111,41 @@ public sealed class MainWindowViewModel : BindableBase
 
         string? navigationTarget = target!;
 
-        if (navigationTarget == "ParameterSettingsView" && applicationStatus.IsInspectionRunning)
+        if (navigationTarget == "ParameterSettingsView" && !userSession.CanAccessParameterSettings)
+        {
+            //bool loginSucceeded = loginDialogService.ShowDialog(Application.Current?.MainWindow);
+
+            //if (!loginSucceeded)
+            //{
+            //    RefreshNavigationSelection();
+            //    return;
+            //}
+
+            //if (!userSession.CanAccessParameterSettings)
+            //{
+            //    MessageBox.Show(
+            //        Application.Current?.MainWindow,
+            //        "参数设置需要工程师或管理员权限。",
+            //        "权限不足",
+            //        MessageBoxButton.OK,
+            //        MessageBoxImage.Warning);
+            //    RefreshNavigationSelection();
+            //    return;
+            //}
+
+            MessageBox.Show(Application.Current?.MainWindow, "参数设置需要工程师或管理员权限", "权限不足", MessageBoxButton.OK, MessageBoxImage.Warning);
+            RefreshNavigationSelection();
+            return;
+        }
+
+        //设置页面和仿真测试页面需要登录权限
+        if ((navigationTarget == "ParameterSettingsView" ||
+             navigationTarget == "SinmulationTestView") &&
+             applicationStatus.IsInspectionRunning)
         {
             MessageBoxResult confirmation = MessageBox.Show(
                 Application.Current?.MainWindow,
-                "软件正在运行，进入参数设置前需要停止检测。是否停止运行？",
+                "软件正在运行，是否停止运行？",
                 "停止运行确认",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question,
@@ -111,21 +162,23 @@ public sealed class MainWindowViewModel : BindableBase
         }
         regionManager.RequestNavigate(MainRegionName, navigationTarget);
         SelectedPage = navigationTarget;
-        switch (navigationTarget)
+        PageTitle = navigationTarget switch
         {
-            case "ParameterSettingsView":
-                PageTitle = "参数设置";
-                break;
-            case "ProductionStatisticsView":
-                PageTitle = "生产统计";
-                break;
-            case "SystemSettingsView":
-                PageTitle = "系统设置";
-                break;
-            default:
-                PageTitle = "检测界面";
-                break;
-        }
+            "ParameterSettingsView" => "参数设置",
+            "ProductionStatisticsView" => "生产统计",
+            "SystemSettingsView" => "系统设置",
+            "SinmulationTestView" => "仿真测试",
+            _ => "检测界面"
+        };
+    }
+    private void OnSessionExpired(object? sender, EventArgs e)
+    {
+        MessageBox.Show(
+            Application.Current?.MainWindow,
+            "登录已超过 5 分钟，请重新登录。",
+            "登录超时",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
     }
     /// <summary>
     /// 刷新按钮的状态
@@ -135,7 +188,8 @@ public sealed class MainWindowViewModel : BindableBase
         RaisePropertyChanged(nameof(IsDetectionSelected));
         RaisePropertyChanged(nameof(IsParametersSelected));
         RaisePropertyChanged(nameof(IsStatisticsSelected));
-        RaisePropertyChanged(nameof(IsSystemSelected));
+        RaisePropertyChanged(nameof(IsSinmulationTestSelected));
+        //RaisePropertyChanged(nameof(IsSystemSelected));
     }
     #endregion
 }

@@ -9,7 +9,6 @@ public sealed class InspectionResult
         double cycleTimeMilliseconds,
         string recipeName = "",
         string panelId = "",
-        string imagePath = "",
         string message = "",
         IReadOnlyList<DefectDetail>? defects = null)
     {
@@ -19,7 +18,6 @@ public sealed class InspectionResult
         CycleTimeMilliseconds = cycleTimeMilliseconds;
         RecipeName = recipeName;
         PanelId = panelId;
-        ImagePath = imagePath;
         Message = message;
         Defects = defects ?? Array.Empty<DefectDetail>();
     }
@@ -36,7 +34,6 @@ public sealed class InspectionResult
 
     public string PanelId { get; }
 
-    public string ImagePath { get; }
 
     public string Message { get; }
 

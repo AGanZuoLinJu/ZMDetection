@@ -51,7 +51,7 @@
                                    VerticalAlignment="Center" />
                     </Border>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="ZM-PCB检测平台"
+                        <TextBlock Text="{Binding WindowTitle}"
                                    Foreground="#172033"
                                    FontSize="27"
                                    FontWeight="Bold" />
@@ -79,7 +79,7 @@
                                  Maximum="100"
                                  Value="{Binding ProgressValue, Mode=OneWay}"
                                  Foreground="#2563EB"
-                                 Background="#E5EAF1" 
+                                 Background="#E5EAF1"
                                  />
                     <TextBlock Text="{Binding StatusMessage}"
                                TextTrimming="CharacterEllipsis"
