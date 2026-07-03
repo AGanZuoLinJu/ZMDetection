@@ -4,7 +4,7 @@ using PCBDetection.Models;
 
 public interface ICameraService
 {
-    event EventHandler<CameraFrame>? ImageCaptured;
+    event EventHandler<object>? ImageCaptured;
     string CameraName { get; }
     string SerialNumber { get; }
     bool ConnectionStatus { get; }
@@ -13,5 +13,5 @@ public interface ICameraService
     Task DestroyCamera(CancellationToken cancellationToken);
     Task StartGrabbingAsync(CancellationToken cancellationToken);
     Task StopGrabbingAsync(CancellationToken cancellationToken);
-    Task<CameraFrame> GetOneFrameImageAsync(CancellationToken cancellationToken);
+    Task<object> GetOneFrameImageAsync(CancellationToken cancellationToken);
 }

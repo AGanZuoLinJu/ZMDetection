@@ -9,14 +9,14 @@ public sealed class MockAiDetectionService : IAIDetectionService
 
     public bool Status { get; private set; }
 
-    public Task InitializeAsync(RecipeProfile recipe, CancellationToken cancellationToken)
+    public Task InitializeAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         Status = true;
         return Task.CompletedTask;
     }
 
-    public Task<InspectionResult> DetectAsync(InspectionRequest request, CancellationToken cancellationToken)
+    public Task<InspectionResult> DetectAsync(object inputImg, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (!Status)
@@ -26,9 +26,7 @@ public sealed class MockAiDetectionService : IAIDetectionService
 
         sequence++;
         int defectCount = sequence % 5;
-        string boardId = string.IsNullOrWhiteSpace(request.PanelId)
-            ? $"PCB-{DateTime.Now:yyyyMMdd}-{sequence:0000}"
-            : request.PanelId;
+        string boardId = "AAAAAAA";
         string[] defectNames = { "焊点连锡", "元件偏移", "缺件", "焊点虚焊" };
         DefectDetail[] defects = Enumerable.Range(0, defectCount)
             .Select(index => new DefectDetail(
@@ -45,9 +43,8 @@ public sealed class MockAiDetectionService : IAIDetectionService
             defectCount == 0,
             defectCount,
             random.Next(650, 1100),
-            request.RecipeName,
-            boardId,
-            "Mock AI detection finished",
+            inputImg,
+            "AI检测完成",
             defects));
     }
 

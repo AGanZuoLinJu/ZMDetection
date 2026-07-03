@@ -8,9 +8,7 @@ namespace PCBDetection.Services;
 public interface IInspectionService
 {
     bool Status { get; }
-    Task InitializeAsync(RecipeProfile recipe, CancellationToken cancellationToken);
-    Task<InspectionResult> RunInspectionAsync(
-        InspectionRequest request,
-        CancellationToken cancellationToken);
+    Task InitializeAsync(CancellationToken cancellationToken);
+    Task<InspectionResult> RunInspectionAsync(object inputImg,CancellationToken cancellationToken);
     Task ReleaseAsync();
 }

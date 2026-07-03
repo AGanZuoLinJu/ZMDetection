@@ -137,9 +137,9 @@ public partial class App : PrismApplication
         containerRegistry.RegisterSingleton<ITCPServerService, TCPServerService>();
         containerRegistry.RegisterSingleton<ITCPClientService, TCPClientService>();
 
-        containerRegistry.RegisterSingleton<IInspectionService, MockInspectionService>();
+        containerRegistry.RegisterSingleton<IInspectionService, InspectionService>();
         containerRegistry.RegisterSingleton<IAIDetectionService, MockAiDetectionService>();
-        containerRegistry.RegisterSingleton<IRecipeService, RecipeService>();
+        containerRegistry.RegisterSingleton<IParamService, ParamService>();
         containerRegistry.RegisterSingleton<ILightService, MockLightService>();
 
         containerRegistry.RegisterSingleton<IProductionStatisticsService, ProductionStatisticsService>();

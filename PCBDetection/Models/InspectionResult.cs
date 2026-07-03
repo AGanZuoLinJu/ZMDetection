@@ -3,39 +3,28 @@ namespace PCBDetection.Models;
 public sealed class InspectionResult
 {
     public InspectionResult(
-        string boardId,
+        string id,
         bool isOk,
         int defectCount,
-        double cycleTimeMilliseconds,
-        string recipeName = "",
-        string panelId = "",
+        long cycleTimeMilliseconds,
+        object? resultImg = null,
         string message = "",
         IReadOnlyList<DefectDetail>? defects = null)
     {
-        BoardId = boardId;
+        ID = id;
         IsOk = isOk;
         DefectCount = defectCount;
         CycleTimeMilliseconds = cycleTimeMilliseconds;
-        RecipeName = recipeName;
-        PanelId = panelId;
         Message = message;
         Defects = defects ?? Array.Empty<DefectDetail>();
+        ResultImage = resultImg;
     }
 
-    public string BoardId { get; }
-
+    public string ID { get; }
     public bool IsOk { get; }
-
     public int DefectCount { get; }
-
-    public double CycleTimeMilliseconds { get; }
-
-    public string RecipeName { get; }
-
-    public string PanelId { get; }
-
-
+    public long CycleTimeMilliseconds { get; }
     public string Message { get; }
-
     public IReadOnlyList<DefectDetail> Defects { get; }
+    public object? ResultImage { get; }
 }

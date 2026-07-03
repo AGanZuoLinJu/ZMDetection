@@ -7,6 +7,8 @@ public sealed class CameraManager : ICameraManager
     private readonly IReadOnlyList<ICameraService> cameras;
     private readonly Dictionary<string, ICameraService> camerasByName;
     private ILogService? logService;
+    public IReadOnlyList<ICameraService> Cameras => cameras;
+
     public CameraManager(IEnumerable<ICameraService> cameraServices, ILogService? logService = null)
     {
         cameras = cameraServices.ToArray();
@@ -33,7 +35,6 @@ public sealed class CameraManager : ICameraManager
         this.logService = logService;
         this.logService?.Info(LogCategory.Camera, $"添加相机服务完成,相机数量为[{cameras.Count}]");
     }
-    public IReadOnlyList<ICameraService> Cameras => cameras;
     /// <summary>
     /// 根据相机名获取对应相机
     /// </summary>
@@ -56,7 +57,6 @@ public sealed class CameraManager : ICameraManager
             camera = null;
             return false;
         }
-
         return camerasByName.TryGetValue(cameraName.Trim(), out camera);
     }
 }

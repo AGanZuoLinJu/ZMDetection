@@ -1,3 +1,4 @@
+using HalconDotNet;
 using PCBDetection.Models;
 
 namespace PCBDetection.Services;
@@ -6,7 +7,7 @@ public sealed class MockCameraService : ICameraService
     private readonly string cameraName;
     private bool connectionStatus = false;
     public object? GetImage { get; set; }
-    public event EventHandler<CameraFrame>? ImageCaptured;
+    public event EventHandler<object>? ImageCaptured;
     public MockCameraService() : this("Ä£ÄâÏà»ú1")
     {
     }
@@ -60,10 +61,14 @@ public sealed class MockCameraService : ICameraService
             }
         }, cancellationToken);
     }
-    public Task<CameraFrame> GetOneFrameImageAsync(CancellationToken cancellationToken)
+    public Task<object> GetOneFrameImageAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult(new CameraFrame(CameraName, DateTime.Now));
+
+        HObject ho_image;
+        HOperatorSet.GenEmptyObj(out ho_image);
+        HOperatorSet.ReadImage(out ho_image, "D:\\TestImage\\code12802.png");
+        return Task.FromResult<object>(ho_image);
     }
     public string CapturePreview()
     {

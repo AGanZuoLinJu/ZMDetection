@@ -9,4 +9,5 @@ public interface ILogService
     void Info(LogCategory category, string message);
     void Warning(LogCategory category, string message);
     void Error(LogCategory category, string message);
+    void Error(LogCategory category, string message,Exception exception);
 }

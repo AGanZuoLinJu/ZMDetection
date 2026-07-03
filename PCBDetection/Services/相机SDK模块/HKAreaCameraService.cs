@@ -13,7 +13,7 @@ public sealed class HKAreaCameraService : ICameraService
     private readonly ILogService _logService;
     private readonly string cameraName;
     private string serialNumber;
-    public event EventHandler<CameraFrame>? ImageCaptured;
+    public event EventHandler<object>? ImageCaptured;
     public string CameraName => cameraName;
     public string SerialNumber => serialNumber;
     private bool _connectionStatus;
@@ -129,12 +129,12 @@ public sealed class HKAreaCameraService : ICameraService
             }
         }, cancellationToken);
     }
-    public Task<CameraFrame> GetOneFrameImageAsync(CancellationToken cancellationToken)
+    public Task<object> GetOneFrameImageAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         return Task.Run(() =>
         {
-            return new CameraFrame(CameraName, DateTime.Now);
+            return new object();
         }, cancellationToken);
     }
 

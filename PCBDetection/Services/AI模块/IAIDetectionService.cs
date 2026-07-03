@@ -5,10 +5,7 @@ namespace PCBDetection.Services;
 public interface IAIDetectionService
 {
     bool Status { get; }
-
-    Task InitializeAsync(RecipeProfile recipe, CancellationToken cancellationToken);
-
-    Task<InspectionResult> DetectAsync(InspectionRequest request, CancellationToken cancellationToken);
-
+    Task InitializeAsync(CancellationToken cancellationToken);
+    Task<InspectionResult> DetectAsync(object img,CancellationToken cancellationToken);
     Task ReleaseAsync();
 }

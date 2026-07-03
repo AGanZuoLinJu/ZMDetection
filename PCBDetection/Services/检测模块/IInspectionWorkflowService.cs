@@ -7,4 +7,5 @@ public interface IInspectionWorkflowService
     bool IsRunning { get; }
     Task<InspectionResult> StartRunAsync(CancellationToken cancellationToken);
     Task StopAsync();
+    bool InitializeCamera();
 }

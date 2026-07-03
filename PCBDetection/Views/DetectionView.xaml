@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:prism="http://prismlibrary.com/"
              xmlns:halcon="clr-namespace:HalconDotNet;assembly=halcondotnet"
+             xmlns:controls="clr-namespace:PCBDetection.Controls"
              prism:ViewModelLocator.AutoWireViewModel="True">
 
     <Grid Background="#F8F8F8">
@@ -13,9 +14,9 @@
 
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="58" />
-                <RowDefinition Height="*" MinHeight="330" />
-                <RowDefinition Height="176" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="3*" MinHeight="330" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
             <Border Grid.Row="0"
@@ -45,7 +46,7 @@
                 </Grid>
             </Border>
 
-            <!-- Camera viewer -->
+            <!-- Main Window -->
             <Grid Grid.Row="1" Margin="12">
                 <Border Background="LightGray"
                         BorderBrush="#343434"
@@ -60,10 +61,10 @@
                 </Border>
             </Grid>
 
-            <!-- Fixed operation log -->
+            <!-- 日志显示 -->
             <Border Grid.Row="2"
                     Style="{StaticResource WorkbenchPanelStyle}"
-                    Margin="12,0,12,12">
+                    Margin="10,0,10,10">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="42" />
@@ -72,7 +73,7 @@
                     <Border BorderBrush="{StaticResource BorderBrushSoft}"
                             BorderThickness="0,0,0,1">
                         <Grid Margin="14,0">
-                            <TextBlock Text="运行 / 通信日志"
+                            <TextBlock Text="运行日志"
                                        FontWeight="SemiBold"
                                        VerticalAlignment="Center" />
                             <Button Content="清空"
@@ -99,71 +100,45 @@
                 BorderThickness="1,0,0,0">
             <ScrollViewer VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled">
-                <StackPanel Margin="12">
+                <StackPanel Margin="8,2,8,2">
                     <Border Style="{StaticResource SideCardStyle}">
                         <StackPanel>
                             <TextBlock Text="当前产品" Style="{StaticResource SideCardTitleStyle}" />
-                            <Grid Height="36">
+                            <Grid Height="30">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="82" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="产品 ID" Style="{StaticResource KeyLabelStyle}" />
                                 <TextBlock Grid.Column="1"
-                                           Text="{Binding CurrentBoardId}"
+                                           Text="{Binding CurrentID}"
                                            FontFamily="Consolas"
                                            Style="{StaticResource KeyValueStyle}" />
                             </Grid>
                             <Border Height="1" Background="{StaticResource BorderBrushSoft}" />
-                            <Grid Height="36">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="82" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="产品型号" Style="{StaticResource KeyLabelStyle}" />
-                                <TextBlock Grid.Column="1"
-                                           Text="{Binding CurrentRecipe}"
-                                           Style="{StaticResource KeyValueStyle}" />
-                            </Grid>
-                            <Border Height="1" Background="{StaticResource BorderBrushSoft}" />
-                            <Grid Height="36">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="82" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="检测面" Style="{StaticResource KeyLabelStyle}" />
-                                <TextBlock Grid.Column="1" Text="A 面" Style="{StaticResource KeyValueStyle}" />
-                            </Grid>
-                        </StackPanel>
-                    </Border>
-
-                    <Border Style="{StaticResource SideCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="本次检测结果"
-                                       Foreground="{StaticResource MutedTextBrush}"
-                                       FontSize="12"
-                                       HorizontalAlignment="Center" />
-                            <TextBlock Text="{Binding InspectionResult}"
-                                       Style="{StaticResource ResultTextStyle}"
-                                       Margin="0,5"
-                                       FontSize="100"
-                                       FontWeight="Bold"/>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Text="发现 " Foreground="{StaticResource MutedTextBrush}" FontSize="12" />
-                                <TextBlock Text="{Binding DefectCount}" Foreground="{StaticResource MutedTextBrush}" FontSize="12" />
-                                <TextBlock Text=" 处缺陷 · 耗时 " Foreground="{StaticResource MutedTextBrush}" FontSize="12" />
-                                <TextBlock Text="{Binding CycleTime, StringFormat={}{0:N0} ms}"
-                                           Foreground="{StaticResource MutedTextBrush}"
-                                           FontSize="12" />
+                            <StackPanel>
+                                <TextBlock Text="{Binding InspectionResult}"
+                                           Style="{StaticResource ResultTextStyle}"
+                                           Margin="0,5"
+                                           FontSize="90"
+                                           FontWeight="Bold"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock Text="发现 " Foreground="{StaticResource MutedTextBrush}" FontSize="12" />
+                                    <TextBlock Text="{Binding DefectCount}" Foreground="{StaticResource MutedTextBrush}" FontSize="12" />
+                                    <TextBlock Text=" 处缺陷 · 耗时 " Foreground="{StaticResource MutedTextBrush}" FontSize="12" />
+                                    <TextBlock Text="{Binding CycleTime, StringFormat={}{0:N0} ms}"
+                                               Foreground="{StaticResource MutedTextBrush}"
+                                               FontSize="12" />
+                                </StackPanel>
                             </StackPanel>
+
                         </StackPanel>
                     </Border>
-
                     <Border Style="{StaticResource SideCardStyle}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
-                                <RowDefinition Height="180" />
+                                <RowDefinition Height="150" />
                             </Grid.RowDefinitions>
                             <DockPanel Margin="0,0,0,10">
                                 <TextBlock Text="缺陷明细"
@@ -208,8 +183,8 @@
                             <TextBlock Text="当前班次产量" Style="{StaticResource SideCardTitleStyle}" />
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="62" />
-                                    <RowDefinition Height="62" />
+                                    <RowDefinition Height="55" />
+                                    <RowDefinition Height="55" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
@@ -241,7 +216,7 @@
                                     Background="{StaticResource BorderBrushSoft}"
                                     Margin="0,4,0,12" />
                             <Grid Margin="0,0,0,7">
-                                <TextBlock Text="直通率" FontSize="12" />
+                                <TextBlock Text="OK率" FontSize="12" />
                                 <TextBlock Text="{Binding YieldRate, StringFormat={}{0:N1}%}"
                                            FontFamily="Consolas"
                                            FontWeight="SemiBold"
@@ -254,6 +229,72 @@
                                          Value="{Binding YieldRate, Mode=OneWay}"
                                          Foreground="{StaticResource OkBrush}"
                                          Background="{StaticResource BorderBrushSoft}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource SideCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="班次良率分布"
+                                       Style="{StaticResource SideCardTitleStyle}" />
+                            <Grid Width="140"
+                                  Height="140"
+                                  HorizontalAlignment="Center"
+                                  Margin="0,2,0,5">
+                                <controls:DonutChart OkValue="{Binding OkCount}"
+                                                     NgValue="{Binding NgCount}"
+                                                     OkBrush="{StaticResource OkBrush}"
+                                                     NgBrush="{StaticResource NgBrush}"
+                                                     EmptyBrush="{StaticResource BorderBrushSoft}"
+                                                     StrokeThickness="30"
+                                                     Margin="1" />
+                                <StackPanel HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding YieldRate, StringFormat={}{0:N1}%}"
+                                               FontFamily="Consolas"
+                                               FontSize="20"
+                                               FontWeight="SemiBold"
+                                               HorizontalAlignment="Center" />
+                                    <TextBlock Text="OK率"
+                                               Foreground="{StaticResource MutedTextBrush}"
+                                               FontSize="11"
+                                               HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Orientation="Horizontal"
+                                            HorizontalAlignment="Center">
+                                    <Ellipse Width="8"
+                                             Height="8"
+                                             Fill="{StaticResource OkBrush}"
+                                             Margin="0,0,6,0" />
+                                    <TextBlock Text="OK "
+                                               Foreground="{StaticResource MutedTextBrush}"
+                                               FontSize="12" />
+                                    <TextBlock Text="{Binding OkCount}"
+                                               FontWeight="SemiBold"
+                                               FontSize="12" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1"
+                                            Orientation="Horizontal"
+                                            HorizontalAlignment="Center">
+                                    <Ellipse Width="8"
+                                             Height="8"
+                                             Fill="{StaticResource NgBrush}"
+                                             Margin="0,0,6,0" />
+                                    <TextBlock Text="NG "
+                                               Foreground="{StaticResource MutedTextBrush}"
+                                               FontSize="12" />
+                                    <TextBlock Text="{Binding NgCount}"
+                                               FontWeight="SemiBold"
+                                               FontSize="12" />
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
                     </Border>
                 </StackPanel>

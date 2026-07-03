@@ -8,7 +8,7 @@ public sealed class StartupService : IStartupService
     private const int PlcPort = 5000;
     private const int MesListenPort = 6000;
 
-    private readonly IRecipeService recipeService;
+    private readonly IParamService paramService;
     private readonly ICameraManager cameraManager;
     private readonly ILightService lightService;
     private readonly IInspectionService inspectionService;
@@ -21,7 +21,7 @@ public sealed class StartupService : IStartupService
     private bool initialized;
 
     public StartupService(
-        IRecipeService recipeService,
+        IParamService recipeService,
         ICameraManager cameraManager,
         ILightService lightService,
         IInspectionService inspectionService,
@@ -32,7 +32,7 @@ public sealed class StartupService : IStartupService
         ILogService logService,
         IAuthenticationService authenticationService)
     {
-        this.recipeService = recipeService;
+        this.paramService = recipeService;
         this.cameraManager = cameraManager;
         this.lightService = lightService;
         this.inspectionService = inspectionService;
@@ -74,12 +74,12 @@ public sealed class StartupService : IStartupService
         //初始化机种参数
         await RunStepAsync(
             12,
-            "机种",
+            "参数",
             async () =>
             {
-                var recipe = await recipeService.LoadCurrentRecipeAsync(cancellationToken);
-                applicationStatus.SetCurrentRecipe(recipe.RecipeName);
-                return $"机种加载: {recipe.RecipeName}";
+                var result = await paramService.InitAllParam(cancellationToken);
+                applicationStatus.SetParamStatus(result);
+                return $"机种[{RecipeParam.RecipeParamConfig!.CurrentRecipeName}]参数加载完成";
             },
             progress,
             cancellationToken);
@@ -120,7 +120,7 @@ public sealed class StartupService : IStartupService
             "检测模块",
             async () =>
             {
-                await inspectionService.InitializeAsync(recipeService.CurrentRecipe,cancellationToken);
+                await inspectionService.InitializeAsync(cancellationToken);
                 applicationStatus.SetDetectionStatus(inspectionService.Status);
                 return "正在初始化检测模块";
             },
@@ -138,10 +138,8 @@ public sealed class StartupService : IStartupService
 
                 if (!connected)
                 {
-                    throw new InvalidOperationException(
-                        $"PLC TCP 连接失败: {PlcIpAddress}:{PlcPort}");
+                    throw new InvalidOperationException($"PLC TCP 连接失败: {PlcIpAddress}:{PlcPort}");
                 }
-
                 return $"PLC TCP 客户端已连接: {PlcIpAddress}:{PlcPort}";
             },
             progress,

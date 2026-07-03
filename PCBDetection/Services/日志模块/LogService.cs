@@ -23,6 +23,7 @@ public sealed class LogService : ILogService
     public void Info(LogCategory category, string message) => Add(category, "INFO", message);
     public void Warning(LogCategory category, string message) => Add(category, "WARN", message);
     public void Error(LogCategory category, string message) => Add(category, "ERROR", message);
+    public void Error(LogCategory category, string message, Exception e) => Add(category, "ERROR", $"{message} 错误:{e.Message}");
     private void Add(LogCategory category, string level, string message)
     {
         var logItem = new LogItem(DateTime.Now, category, level, message);

@@ -1,5 +1,7 @@
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Text;
 using System.Windows;
 using HalconDotNet;
 using PCBDetection.Models;
@@ -16,6 +18,7 @@ public sealed class DetectionViewModel : BindableBase
     private readonly IProductionStatisticsService statisticsService;            //数据统计
     private readonly ILogService logService;
     private readonly IApplicationStatus applicationStatus;                      //软件状态
+    private readonly ITCPClientService plcClientService;
     #endregion
 
     #region <<<数据统计相关
@@ -57,23 +60,29 @@ public sealed class DetectionViewModel : BindableBase
 
     private CancellationTokenSource? runCancellation;
     private string inspectionResult = "NA";
-    private string currentBoardId = "--";
+    private string currentId = "--";
     private double cycleTime;
     private bool isRunning;
+    private ConcurrentQueue<string> RecvPLCMsgQueue;
 
     #region <<<构造函数
     public DetectionViewModel(
         IInspectionWorkflowService workflowService,
         IProductionStatisticsService statisticsService,
         ILogService logService,
-        IApplicationStatus applicationStatus)
+        IApplicationStatus applicationStatus,
+        ITCPClientService plcClientService)
     {
         this.workflowService = workflowService;
         this.statisticsService = statisticsService;
         this.logService = logService;
         this.applicationStatus = applicationStatus;
+        this.plcClientService = plcClientService;
+        this.plcClientService.DataReceived -= OnPlcDataReceived;
+        this.plcClientService.DataReceived += OnPlcDataReceived;
+        RecvPLCMsgQueue = new ConcurrentQueue<string>();
 
-        CurrentRecipe = applicationStatus.CurrentRecipe;
+        CurrentRecipe = RecipeParam.RecipeParamConfig!.CurrentRecipeName!;
 
         ToggleInspectionCommand = new DelegateCommand(async () => await ToggleInspectionAsync());
         ClearLogViewCommand = new DelegateCommand(() => LogItems.Clear());
@@ -91,6 +100,14 @@ public sealed class DetectionViewModel : BindableBase
         logService.LogAdded += OnLogAdded;
         ApplyStatistics(statisticsService.Current);
     }
+    private void OnPlcDataReceived(object? sender, byte[] data)
+    {
+        string message = Encoding.UTF8.GetString(data);
+        if (!string.IsNullOrEmpty(message))
+        {
+            RecvPLCMsgQueue.Enqueue(message);
+        }
+    }
     #endregion
 
     public string InspectionResult
@@ -98,10 +115,10 @@ public sealed class DetectionViewModel : BindableBase
         get => inspectionResult;
         private set => SetProperty(ref inspectionResult, value);
     }
-    public string CurrentBoardId
+    public string CurrentID
     {
-        get => currentBoardId;
-        private set => SetProperty(ref currentBoardId, value);
+        get => currentId;
+        private set => SetProperty(ref currentId, value);
     }
     public string CurrentRecipe { get; }
     public double CycleTime
@@ -141,10 +158,33 @@ public sealed class DetectionViewModel : BindableBase
     {
         if (!IsRunning)
         {
+            //所有连接成功后才能运行检测
+            if (!(applicationStatus.CameraStatus &&
+                applicationStatus.PlcStatus &&
+                applicationStatus.MesStatus &&
+                applicationStatus.LightStatus &&
+                applicationStatus.DetectionStatus))
+            {
+                MessageBox.Show(Application.Current?.MainWindow, "硬件未初始化成功,不允许开始检测!");
+                return;
+            }
+
+            IsRunning = true;
+            applicationStatus.SetInspectionRunning(true);
+            logService.Info(LogCategory.Running, "检测开始运行...");
+            ClearRecvMsgQueue<string>(RecvPLCMsgQueue);                         //清空消息队列
+
+            //开始前先获取相机
+            if (!workflowService.InitializeCamera())
+            {
+                MessageBox.Show(Application.Current?.MainWindow, "获取相机对象失败,无法开始检测!");
+                return;
+            }
             await StartInspectionAsync();
             return;
         }
 
+        //停止
         var confirmation = MessageBox.Show(
             Application.Current?.MainWindow,
             "确定要停止检测吗？",
@@ -184,20 +224,28 @@ public sealed class DetectionViewModel : BindableBase
         runCancellation?.Cancel();
         var cancellation = new CancellationTokenSource();
         runCancellation = cancellation;
-        IsRunning = true;
-        applicationStatus.SetInspectionRunning(true);
-        logService.Info(LogCategory.Running, "检测开始运行...");
 
         try
         {
-            while (applicationStatus.IsInspectionRunning && !cancellation.Token.IsCancellationRequested)
+            while (IsRunning)
             {
-                var result = await workflowService.StartRunAsync(cancellation.Token);
-
-
-                ApplyResult(result);
-
-                await Task.Delay(1000, cancellation.Token);
+                await Task.Delay(1000);
+                if (!(applicationStatus.IsInspectionRunning && !cancellation.Token.IsCancellationRequested))
+                {
+                    continue;
+                }
+                if (RecvPLCMsgQueue.TryDequeue(out string msg))
+                {
+                    if(msg == "1")
+                    {
+                        var result = await workflowService.StartRunAsync(cancellation.Token);
+                        if(result.ResultImage != null)
+                        {
+                            DisplayMainImage = result.ResultImage as HObject;
+                        }
+                        ApplyResult(result);
+                    }
+                }
             }
         }
         catch (OperationCanceledException)
@@ -237,7 +285,7 @@ public sealed class DetectionViewModel : BindableBase
     #region <<<其他方法
     private void ApplyResult(InspectionResult result)
     {
-        CurrentBoardId = result.BoardId;
+        CurrentID = result.ID;
         InspectionResult = result.IsOk ? "OK" : "NG";
         DefectCount = result.DefectCount;
         Defects.Clear();
@@ -252,7 +300,7 @@ public sealed class DetectionViewModel : BindableBase
         {
             logService.Info(
                 LogCategory.Defect,
-                $"{result.BoardId} has {result.DefectCount} defects.");
+                $"{result.ID} has {result.DefectCount} defects.");
         }
     }
     private void ApplyStatistics(ProductionStatisticsSnapshot snapshot)
@@ -308,6 +356,13 @@ public sealed class DetectionViewModel : BindableBase
         {
             logService.Error(LogCategory.Running, "传入图片为空,无法显示图片!");
         }
+    }
+    /// <summary>
+    /// 清空队列中的消息
+    /// </summary>
+    private void ClearRecvMsgQueue<T>(ConcurrentQueue<T> queue)
+    {
+        while (RecvPLCMsgQueue.TryDequeue(out _)) { }
     }
     #endregion
 }
