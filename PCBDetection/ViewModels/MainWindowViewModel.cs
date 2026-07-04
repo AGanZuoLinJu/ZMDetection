@@ -15,6 +15,7 @@ public sealed class MainWindowViewModel : BindableBase
     private string selectedPage = "DetectionView";
     private string pageTitle = "检测界面";
     private bool navigationInitialized;
+    private bool isSidebarExpanded = true;
     //绑定属性 控制主界面页面导航按钮
     public bool IsDetectionSelected => SelectedPage == "DetectionView";
     public bool IsParametersSelected => SelectedPage == "ParameterSettingsView";
@@ -44,6 +45,26 @@ public sealed class MainWindowViewModel : BindableBase
         get => pageTitle;
         private set => SetProperty(ref pageTitle, value);
     }
+
+    #region <<<侧边栏样式
+    public bool IsSidebarExpanded
+    {
+        get => isSidebarExpanded;
+        set
+        {
+            if (SetProperty(ref isSidebarExpanded, value))
+            {
+                RaisePropertyChanged(nameof(SidebarWidth));
+                RaisePropertyChanged(nameof(SidebarToggleIcon));
+                RaisePropertyChanged(nameof(SidebarToggleToolTip));
+            }
+        }
+    }
+    public GridLength SidebarWidth => new(IsSidebarExpanded ? 196 : 64);
+    public string SidebarToggleIcon => IsSidebarExpanded ? "\uE76B" : "\uE76C";
+    public string SidebarToggleToolTip => IsSidebarExpanded ? "收起侧边栏" : "展开侧边栏";
+    #endregion
+
     /// <summary>
     /// 导航切换命令
     /// </summary>
@@ -111,32 +132,12 @@ public sealed class MainWindowViewModel : BindableBase
 
         string? navigationTarget = target!;
 
-        if (navigationTarget == "ParameterSettingsView" && !userSession.CanAccessParameterSettings)
-        {
-            //bool loginSucceeded = loginDialogService.ShowDialog(Application.Current?.MainWindow);
-
-            //if (!loginSucceeded)
-            //{
-            //    RefreshNavigationSelection();
-            //    return;
-            //}
-
-            //if (!userSession.CanAccessParameterSettings)
-            //{
-            //    MessageBox.Show(
-            //        Application.Current?.MainWindow,
-            //        "参数设置需要工程师或管理员权限。",
-            //        "权限不足",
-            //        MessageBoxButton.OK,
-            //        MessageBoxImage.Warning);
-            //    RefreshNavigationSelection();
-            //    return;
-            //}
-
-            MessageBox.Show(Application.Current?.MainWindow, "参数设置需要工程师或管理员权限", "权限不足", MessageBoxButton.OK, MessageBoxImage.Warning);
-            RefreshNavigationSelection();
-            return;
-        }
+        //if (navigationTarget == "ParameterSettingsView" && !userSession.CanAccessParameterSettings)
+        //{
+        //    MessageBox.Show(Application.Current?.MainWindow, "参数设置需要工程师或管理员权限", "权限不足", MessageBoxButton.OK, MessageBoxImage.Warning);
+        //    RefreshNavigationSelection();
+        //    return;
+        //}
 
         //设置页面和仿真测试页面需要登录权限
         if ((navigationTarget == "ParameterSettingsView" ||

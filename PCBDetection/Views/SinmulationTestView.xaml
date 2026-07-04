@@ -7,7 +7,7 @@
              xmlns:prism="http://prismlibrary.com/"
              mc:Ignorable="d"
              prism:ViewModelLocator.AutoWireViewModel="True">
-    <Grid Margin="20">
+    <Grid Margin="10">
         <Border Style="{StaticResource PanelStyle}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="620">
                 <TextBlock Text="&#xE713;"

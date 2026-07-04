@@ -68,6 +68,8 @@ public sealed class ParamService : IParamService
                 RecipeParam.RecipeParamConfig.CurrentRecipeName = "AAAAAA";
                 RecipeParam.RecipeParamConfig.AllRecipeName.Clear();
                 RecipeParam.RecipeParamConfig.AllRecipeName.Add(new RecipeEntry());
+                RecipeParam.RecipeParamConfig.AllRecipeName.Add(new RecipeEntry() { RecipeName = "BBBBBB",DetectionFace = "B"});
+                RecipeParam.RecipeParamConfig.AllRecipeName.Add(new RecipeEntry() { RecipeName = "CCCCCC",DetectionFace = "C"});
 
                 CurrentRecipeInfo = RecipeParam.RecipeParamConfig.AllRecipeName[0];
                 XMLHelper.Save<RecipeParam>(RecipeParam.RecipeParamConfig, RecipeParamFilePath);

@@ -156,7 +156,6 @@ public partial class App : PrismApplication
         containerRegistry.RegisterForNavigation<DetectionView, DetectionViewModel>("DetectionView");
         containerRegistry.RegisterForNavigation<ParameterSettingsView, ParameterSettingsViewModel>("ParameterSettingsView");
         containerRegistry.RegisterForNavigation<ProductionStatisticsView, ProductionStatisticsViewModel>("ProductionStatisticsView");
-        containerRegistry.RegisterForNavigation<SystemSettingsView, SystemSettingsViewModel>("SystemSettingsView");
         containerRegistry.RegisterForNavigation<SinmulationTestView, SinmulationTestViewModel>("SinmulationTestView");
     }
 }

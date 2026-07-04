@@ -48,9 +48,9 @@ namespace PCBDetection.Models
         [XmlElement("CurrentRecipeName")]
         public string? CurrentRecipeName { get; set; }
         /// <summary>
-        /// 所有导入的机种名
+        /// 所有导入的机种
         /// </summary>
-        [XmlElement("Recipe")]
+        [XmlElement("Recipes")]
         public List<RecipeEntry>? AllRecipeName { get; set; }
         /// <summary>
         /// 当前跑的机种信息
@@ -65,6 +65,7 @@ namespace PCBDetection.Models
             public RecipeEntry() { }
             [XmlAttribute("Name")]
             public string? RecipeName { get; set; } = "AAAAAA";
+            public string? DetectionFace { get; set; } = "A";
         }
     }
 }

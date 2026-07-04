@@ -4,10 +4,6 @@ namespace PCBDetection.Services;
 
 public sealed class StartupService : IStartupService
 {
-    private const string PlcIpAddress = "127.0.0.1";
-    private const int PlcPort = 5000;
-    private const int MesListenPort = 6000;
-
     private readonly IParamService paramService;
     private readonly ICameraManager cameraManager;
     private readonly ILightService lightService;
@@ -74,7 +70,7 @@ public sealed class StartupService : IStartupService
         //初始化机种参数
         await RunStepAsync(
             12,
-            "参数",
+            "参数模块",
             async () =>
             {
                 var result = await paramService.InitAllParam(cancellationToken);
@@ -133,14 +129,16 @@ public sealed class StartupService : IStartupService
             "PLC",
             async () =>
             {
-                var connected = await plcClientService.ConnectAsync(PlcIpAddress, PlcPort);
+                string plcIpAddress = CommunicationParam.CommParamConfig.PLCIPAddress;
+                int plcPort = CommunicationParam.CommParamConfig.PLCPort;
+                var connected = await plcClientService.ConnectAsync(plcIpAddress, plcPort);
                 applicationStatus.SetPlcStatus(plcClientService.IsConnected);
 
                 if (!connected)
                 {
-                    throw new InvalidOperationException($"PLC TCP 连接失败: {PlcIpAddress}:{PlcPort}");
+                    throw new InvalidOperationException($"PLC TCP 连接失败: {plcIpAddress}:{plcPort}");
                 }
-                return $"PLC TCP 客户端已连接: {PlcIpAddress}:{PlcPort}";
+                return $"PLC TCP 客户端已连接: {plcIpAddress}:{plcPort}";
             },
             progress,
             cancellationToken);
@@ -151,9 +149,10 @@ public sealed class StartupService : IStartupService
             "MES",
             async () =>
             {
-                await mesServerService.StartListeningAsync(MesListenPort);
+                int mesListenPort = CommunicationParam.CommParamConfig.MESPort;
+                await mesServerService.StartListeningAsync(mesListenPort);
                 applicationStatus.SetMesStatus(mesServerService.IsListening);
-                return $"MES TCP 服务端已监听端口: {MesListenPort}";
+                return $"MES TCP 服务端已监听端口: {mesListenPort}";
             },
             progress,
             cancellationToken);

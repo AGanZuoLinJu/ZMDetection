@@ -48,11 +48,15 @@ namespace PCBDetection.Models
         /// <summary>
         /// PLCIP地址
         /// </summary>
-        public string PLCIPAddress { get; set; } = "192.168.10.30";
+        public string PLCIPAddress { get; set; } = "127.0.0.1";
         /// <summary>
         /// PLC端口号
         /// </summary>
-        public int PLCPort { get; set; } = 8010;
+        public int PLCPort { get; set; } = 5000;
+        /// <summary>
+        /// MES服务端监听端口
+        /// </summary>
+        public int MESPort { get; set; } = 6000;
         #endregion
     }
 }

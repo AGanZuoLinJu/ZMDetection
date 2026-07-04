@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using HalconDotNet;
+using PCBDetection.EventAggregator;
 using PCBDetection.Models;
 using PCBDetection.Services;
 using Prism.Commands;
@@ -19,6 +20,7 @@ public sealed class DetectionViewModel : BindableBase
     private readonly ILogService logService;
     private readonly IApplicationStatus applicationStatus;                      //软件状态
     private readonly ITCPClientService plcClientService;
+    private readonly IEventAggregator eventAggregator;
     #endregion
 
     #region <<<数据统计相关
@@ -64,6 +66,7 @@ public sealed class DetectionViewModel : BindableBase
     private double cycleTime;
     private bool isRunning;
     private ConcurrentQueue<string> RecvPLCMsgQueue;
+    private string currentRecipe = "A";
 
     #region <<<构造函数
     public DetectionViewModel(
@@ -71,13 +74,17 @@ public sealed class DetectionViewModel : BindableBase
         IProductionStatisticsService statisticsService,
         ILogService logService,
         IApplicationStatus applicationStatus,
-        ITCPClientService plcClientService)
+        ITCPClientService plcClientService,
+        IEventAggregator eventAggregator)
     {
         this.workflowService = workflowService;
         this.statisticsService = statisticsService;
         this.logService = logService;
         this.applicationStatus = applicationStatus;
         this.plcClientService = plcClientService;
+        this.eventAggregator = eventAggregator;
+        this.eventAggregator.GetEvent<RecipeChangedEvent>().Subscribe(() => CurrentRecipe = RecipeParam.RecipeParamConfig!.CurrentRecipeName!);
+
         this.plcClientService.DataReceived -= OnPlcDataReceived;
         this.plcClientService.DataReceived += OnPlcDataReceived;
         RecvPLCMsgQueue = new ConcurrentQueue<string>();
@@ -120,7 +127,11 @@ public sealed class DetectionViewModel : BindableBase
         get => currentId;
         private set => SetProperty(ref currentId, value);
     }
-    public string CurrentRecipe { get; }
+    public string CurrentRecipe 
+    { 
+        get => currentRecipe; 
+        set => SetProperty(ref currentRecipe, value); 
+    }
     public double CycleTime
     {
         get => cycleTime;
