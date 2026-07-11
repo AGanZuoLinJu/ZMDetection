@@ -1,0 +1,22 @@
+using System.ComponentModel;
+
+namespace ZMDetection.Services;
+
+public interface IApplicationStatus : INotifyPropertyChanged
+{
+    bool CameraStatus { get; }
+    bool PlcStatus { get; }
+    bool MesStatus { get; }
+    bool LightStatus { get; }
+    bool DetectionStatus { get; }
+    bool IsInspectionRunning { get; }
+    bool ParamStatus { get; }
+
+    void SetCameraStatus(bool value);
+    void SetPlcStatus(bool value);
+    void SetMesStatus(bool value);
+    void SetLightStatus(bool value);
+    void SetDetectionStatus(bool value);
+    void SetInspectionRunning(bool value);
+    void SetParamStatus(bool value);
+}
