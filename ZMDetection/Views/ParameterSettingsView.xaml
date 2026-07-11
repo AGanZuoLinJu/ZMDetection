@@ -42,7 +42,7 @@
                                           ItemsSource="{Binding RecipeNames}"
                                           SelectedValue="{Binding CurrentRecipeName}"
                                           Style="{StaticResource ParameterComboBoxStyle}"/>
-                                <Button Content="&#xE710;" Width="25" Height="25" Grid.Column="2" Margin="10,0">
+                                <Button Content="&#xE710;" Width="25" Height="25" Grid.Column="2" Margin="10,0" Command="{Binding AddRecipeCommand}">
                                     <Button.Resources>
                                         <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
                                             <Setter Property="Width" Value="25" />

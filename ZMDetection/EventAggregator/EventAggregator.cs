@@ -6,8 +6,5 @@ using System.Threading.Tasks;
 
 namespace ZMDetection.EventAggregator
 {
-    public class RecipeChangedEvent : PubSubEvent
-    {
-
-    }
+    public class RecipeChangedEvent : PubSubEvent { }
 }

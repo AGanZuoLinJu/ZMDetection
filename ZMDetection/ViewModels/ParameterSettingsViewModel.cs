@@ -1,12 +1,14 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Windows;
+using Microsoft.Xaml.Behaviors;
+using Prism.Commands;
+using Prism.Mvvm;
 using ZMDetection.EventAggregator;
 using ZMDetection.Models;
 using ZMDetection.Services;
 using ZMDetection.Tools;
-using Prism.Commands;
-using Prism.Mvvm;
 
 namespace ZMDetection.ViewModels;
 
@@ -15,6 +17,7 @@ public sealed class ParameterSettingsViewModel : BindableBase
     private readonly IParamService paramService;
     private readonly ILogService logService;
     private readonly IEventAggregator eventAggregator;
+    private readonly IAddRecipeService addRecipeService;
 
     private string currentRecipeName = string.Empty;
     private double defectLong;
@@ -34,12 +37,16 @@ public sealed class ParameterSettingsViewModel : BindableBase
     public ParameterSettingsViewModel(
         IParamService paramService,
         ILogService logService,
-        IEventAggregator eventAggregator)
+        IEventAggregator eventAggregator,
+        IAddRecipeService addRecipeService)
     {
         this.paramService = paramService;
         this.logService = logService;
         this.eventAggregator = eventAggregator;
+        this.addRecipeService = addRecipeService;
+
         SaveCommand = new DelegateCommand(SaveParam);
+        AddRecipeCommand = new DelegateCommand(AddNewRecipe);
         LoadParam();
     }
     public ObservableCollection<string> RecipeNames { get; } = new();
@@ -123,6 +130,20 @@ public sealed class ParameterSettingsViewModel : BindableBase
         }
     }
     public DelegateCommand SaveCommand { get; }
+    public DelegateCommand AddRecipeCommand { get; }
+    private void AddNewRecipe()
+    {
+        addRecipeService.ShowDialog(Application.Current.MainWindow);
+        RecipeNames.Clear();
+        foreach (var recipe in RecipeParam.RecipeParamConfig!.AllRecipeName ?? Enumerable.Empty<RecipeParam.RecipeEntry>())
+        {
+            if (!string.IsNullOrWhiteSpace(recipe.RecipeName))
+            {
+                RecipeNames.Add(recipe.RecipeName!);
+            }
+        }
+        CurrentRecipeName = RecipeParam.RecipeParamConfig.CurrentRecipeName ?? string.Empty;
+    }
     private void LoadParam()
     {
         RecipeNames.Clear();
@@ -237,10 +258,7 @@ public sealed class ParameterSettingsViewModel : BindableBase
         RecipeParam.RecipeParamConfig!.CurrentRecipeName = CurrentRecipeName.Trim();
         RecipeParam.RecipeParamConfig!.AllRecipeName ??= new List<RecipeParam.RecipeEntry>();
         if (!RecipeParam.RecipeParamConfig!.AllRecipeName.Any(recipe =>
-                string.Equals(
-                    recipe.RecipeName,
-                    RecipeParam.RecipeParamConfig!.CurrentRecipeName,
-                    StringComparison.OrdinalIgnoreCase)))
+                string.Equals(recipe.RecipeName,RecipeParam.RecipeParamConfig!.CurrentRecipeName,StringComparison.OrdinalIgnoreCase)))
         {
             RecipeParam.RecipeParamConfig!.AllRecipeName.Add(new RecipeParam.RecipeEntry
             {

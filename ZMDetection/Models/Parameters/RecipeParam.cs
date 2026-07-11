@@ -65,7 +65,6 @@ namespace ZMDetection.Models
             public RecipeEntry() { }
             [XmlAttribute("Name")]
             public string? RecipeName { get; set; } = "AAAAAA";
-            public string? DetectionFace { get; set; } = "A";
         }
     }
 }

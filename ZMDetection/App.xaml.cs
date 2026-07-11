@@ -136,23 +136,23 @@ public partial class App : PrismApplication
         //通讯
         containerRegistry.RegisterSingleton<ITCPServerService, TCPServerService>();
         containerRegistry.RegisterSingleton<ITCPClientService, TCPClientService>();
-
+        //检测
         containerRegistry.RegisterSingleton<IInspectionService, InspectionService>();
         containerRegistry.RegisterSingleton<IAIDetectionService, MockAiDetectionService>();
+        containerRegistry.RegisterSingleton<IInspectionWorkflowService, InspectionWorkflowService>();
+        //参数设置
         containerRegistry.RegisterSingleton<IParamService, ParamService>();
         containerRegistry.RegisterSingleton<ILightService, MockLightService>();
+        containerRegistry.RegisterSingleton<IAddRecipeService, AddRecipeService>();
 
         containerRegistry.RegisterSingleton<IProductionStatisticsService, ProductionStatisticsService>();
-        containerRegistry.RegisterSingleton<IInspectionWorkflowService, InspectionWorkflowService>();
         containerRegistry.RegisterSingleton<IApplicationStatus, ApplicationStatus>();
         containerRegistry.RegisterSingleton<IStartupService, StartupService>();
-
         //用户登录相关
         containerRegistry.RegisterSingleton<IAuthenticationService, AuthenticationService>();
         containerRegistry.RegisterSingleton<IUserSession, UserSession>();
         containerRegistry.RegisterSingleton<ILoginDialogService, LoginDialogService>();
-
-        //页面注册
+        //导航页面
         containerRegistry.RegisterForNavigation<DetectionView, DetectionViewModel>("DetectionView");
         containerRegistry.RegisterForNavigation<ParameterSettingsView, ParameterSettingsViewModel>("ParameterSettingsView");
         containerRegistry.RegisterForNavigation<ProductionStatisticsView, ProductionStatisticsViewModel>("ProductionStatisticsView");
