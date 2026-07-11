@@ -1,2 +1,2 @@
-# PCBDetection
-PCB检测软件WPF版本
+# ZMDetection
+ZM视觉检测软件
