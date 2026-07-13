@@ -135,7 +135,7 @@
                         </StackPanel>
                     </Border>
                     <Border Style="{StaticResource SideCardStyle}">
-                        <Grid>
+                        <Grid Height="230">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="150" />
@@ -154,19 +154,19 @@
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="缺陷名"
                                                         Binding="{Binding Name}"
-                                                        Width="56" />
+                                                        Width="80" />
                                     <DataGridTextColumn Header="X"
                                                         Binding="{Binding DefectX}"
-                                                        Width="28" />
+                                                        Width="32" />
                                     <DataGridTextColumn Header="Y"
                                                         Binding="{Binding DefectY}"
-                                                        Width="28" />
+                                                        Width="32" />
                                     <DataGridTextColumn Header="长"
                                                         Binding="{Binding Width}"
-                                                        Width="28" />
+                                                        Width="32" />
                                     <DataGridTextColumn Header="宽"
                                                         Binding="{Binding Height}"
-                                                        Width="28" />
+                                                        Width="32" />
                                     <DataGridTextColumn Header="面积"
                                                         Binding="{Binding Area}"
                                                         Width="42" />
@@ -212,23 +212,23 @@
                                                Style="{StaticResource CompactStatValueStyle}" />
                                 </StackPanel>
                             </Grid>
-                            <Border Height="1"
-                                    Background="{StaticResource BorderBrushSoft}"
-                                    Margin="0,4,0,12" />
-                            <Grid Margin="0,0,0,7">
-                                <TextBlock Text="OK率" FontSize="12" />
-                                <TextBlock Text="{Binding YieldRate, StringFormat={}{0:N1}%}"
-                                           FontFamily="Consolas"
-                                           FontWeight="SemiBold"
-                                           FontSize="12"
-                                           HorizontalAlignment="Right" />
-                            </Grid>
-                            <ProgressBar Height="6"
-                                         Minimum="0"
-                                         Maximum="100"
-                                         Value="{Binding YieldRate, Mode=OneWay}"
-                                         Foreground="{StaticResource OkBrush}"
-                                         Background="{StaticResource BorderBrushSoft}" />
+                            <!--<Border Height="1"
+                            Background="{StaticResource BorderBrushSoft}"
+                            Margin="0,4,0,12" />-->
+                            <!--<Grid Margin="0,0,0,7">
+                            <TextBlock Text="OK率" FontSize="12" />
+                            <TextBlock Text="{Binding YieldRate, StringFormat={}{0:N1}%}"
+                            FontFamily="Consolas"
+                            FontWeight="SemiBold"
+                            FontSize="12"
+                            HorizontalAlignment="Right" />
+                            </Grid>-->
+                            <!--<ProgressBar Height="6"
+                            Minimum="0"
+                            Maximum="100"
+                            Value="{Binding YieldRate, Mode=OneWay}"
+                            Foreground="{StaticResource OkBrush}"
+                            Background="{StaticResource BorderBrushSoft}" />-->
                         </StackPanel>
                     </Border>
 

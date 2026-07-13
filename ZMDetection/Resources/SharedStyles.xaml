@@ -3,6 +3,10 @@
                     xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
                     xmlns:converters="clr-namespace:ZMDetection.Converters">
 
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="ProductionStatisticsStyles.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
     <converters:ConnectionStatusToBrushConverter x:Key="ConnectionStatusToBrushConverter" />
 
     <!-- colors -->
@@ -512,7 +516,7 @@
         <Setter Property="HeadersVisibility" Value="Column" />
         <Setter Property="ColumnHeaderHeight" Value="30" />
         <Setter Property="RowHeight" Value="40" />
-        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontSize" Value="13" />
         <Setter Property="CanUserAddRows" Value="False" />
         <Setter Property="CanUserDeleteRows" Value="False" />
         <Setter Property="CanUserResizeRows" Value="False" />

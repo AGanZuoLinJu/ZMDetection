@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace ZMDetection.Models;
 
 public sealed class DefectDetail
@@ -19,4 +21,18 @@ public sealed class DefectDetail
     public int Width { get; }
     public int Height { get; }
     public int Area => Width * Height;
+
+    public enum DefectType
+    {
+        [Description("È±¼þ")]
+        PCBQJ,
+        [Description("¶à¼þ")]
+        PCBDJ,
+        [Description("PCBÆ«ÒÆ")]
+        PCBPY,
+        [Description("PCBÆÆËð")]
+        PCBPS,
+        [Description("PCB°åÃæÂ¶Í­")]
+        PCBLT
+    }
 }

@@ -14,6 +14,7 @@ public sealed class StartupService : IStartupService
     private readonly IApplicationStatus applicationStatus;
     private readonly ILogService logService;
     private readonly IAuthenticationService authenticationService;
+    private readonly IProductionStatisticsService productionStatisticsService;
     private bool initialized;
 
     public StartupService(
@@ -26,7 +27,8 @@ public sealed class StartupService : IStartupService
         ITCPServerService mesServerService,
         IApplicationStatus applicationStatus,
         ILogService logService,
-        IAuthenticationService authenticationService)
+        IAuthenticationService authenticationService,
+        IProductionStatisticsService productionStatisticsService)
     {
         this.paramService = recipeService;
         this.cameraManager = cameraManager;
@@ -38,6 +40,7 @@ public sealed class StartupService : IStartupService
         this.applicationStatus = applicationStatus;
         this.logService = logService;
         this.authenticationService = authenticationService;
+        this.productionStatisticsService = productionStatisticsService;
 
         plcClientService.ConnectionStatusChanged += OnPlcConnectionStatusChanged;
     }
@@ -76,6 +79,17 @@ public sealed class StartupService : IStartupService
                 var result = await paramService.InitAllParam(cancellationToken);
                 applicationStatus.SetParamStatus(result);
                 return $"机种[{RecipeParam.RecipeParamConfig!.CurrentRecipeName}]参数加载完成";
+            },
+            progress,
+            cancellationToken);
+        //加载当天生产统计
+        await RunStepAsync(
+            18,
+            "生产统计",
+            async () =>
+            {
+                await productionStatisticsService.LoadAsync(cancellationToken);
+                return "当天生产统计加载完成";
             },
             progress,
             cancellationToken);
