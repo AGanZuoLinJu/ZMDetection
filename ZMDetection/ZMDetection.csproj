@@ -11,11 +11,16 @@
     <UseWPF>true</UseWPF>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Prefer32Bit>false</Prefer32Bit>
+    <ApplicationIcon>Resources\LOGO.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Resources\LOGO.png" />
     <None Remove="Resources\LOGO.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\LOGO.ico" />
   </ItemGroup>
 
   <ItemGroup>

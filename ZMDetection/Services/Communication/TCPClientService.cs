@@ -125,11 +125,31 @@ namespace ZMDetection.Services
             {
                 await _stream.WriteAsync(data, 0, data.Length);
                 await _stream.FlushAsync();
-                _logService.Info(Models.LogCategory.Communication,$"发送=>[{_remoteEndPoint}]:{FormatData(data)}");
+                //_logService.Info(Models.LogCategory.Communication,$"发送=>[{_remoteEndPoint}]:{FormatData(data)}");
             }
             catch (Exception ex)
             {
                 _logService.Error(Models.LogCategory.Communication,$"TCP客户端向 {_remoteEndPoint} 发送数据失败：{ex.Message}");
+                ErrorOccurred?.Invoke(this, ex);
+                Disconnect();
+                throw;
+            }
+        }
+        public async Task SendAsync(string sendMsg)
+        {
+            if (!IsConnected || _stream == null)
+            {
+                throw new InvalidOperationException("未建立TCP连接,无法发送数据.");
+            }
+            try
+            {
+                byte[] data = Encoding.UTF8.GetBytes(sendMsg);
+                await SendAsync(data);
+                _logService.Info(Models.LogCategory.Communication, $"发送=>[{_remoteEndPoint}]:{sendMsg}");
+            }
+            catch (Exception ex)
+            {
+                _logService.Error(Models.LogCategory.Communication, $"TCP客户端向 {_remoteEndPoint} 发送数据失败：{ex.Message}");
                 ErrorOccurred?.Invoke(this, ex);
                 Disconnect();
                 throw;

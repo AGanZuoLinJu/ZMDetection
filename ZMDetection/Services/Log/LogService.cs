@@ -42,7 +42,7 @@ public sealed class LogService : ILogService
                 history.RemoveAt(0);
             }
         }
-
+        //每添加一条log触发事件
         LogAdded?.Invoke(this, logItem);
         WriteToDisk(logItem);
     }

@@ -127,10 +127,10 @@ public sealed class DetectionViewModel : BindableBase
         get => currentId;
         private set => SetProperty(ref currentId, value);
     }
-    public string CurrentRecipe 
-    { 
-        get => currentRecipe; 
-        set => SetProperty(ref currentRecipe, value); 
+    public string CurrentRecipe
+    {
+        get => currentRecipe;
+        set => SetProperty(ref currentRecipe, value);
     }
     public double CycleTime
     {
@@ -180,17 +180,17 @@ public sealed class DetectionViewModel : BindableBase
                 return;
             }
 
-            IsRunning = true;
-            applicationStatus.SetInspectionRunning(true);
-            logService.Info(LogCategory.Running, "检测开始运行...");
-            ClearRecvMsgQueue<string>(RecvPLCMsgQueue);                         //清空消息队列
-
             //开始前先获取相机
             if (!workflowService.InitializeCamera())
             {
                 MessageBox.Show(Application.Current?.MainWindow, "获取相机对象失败,无法开始检测!");
                 return;
             }
+
+            ClearRecvMsgQueue<string>(RecvPLCMsgQueue);                         //清空消息队列
+            IsRunning = true;
+            applicationStatus.SetInspectionRunning(true);
+            logService.Info(LogCategory.Running, "检测开始运行...");
             await StartInspectionAsync();
             return;
         }
@@ -240,37 +240,42 @@ public sealed class DetectionViewModel : BindableBase
         {
             while (IsRunning)
             {
-                await Task.Delay(1000);
-                if (!(applicationStatus.IsInspectionRunning && !cancellation.Token.IsCancellationRequested))
+                try
                 {
-                    continue;
-                }
-                if (RecvPLCMsgQueue.TryDequeue(out string msg))
-                {
-                    if(msg == "1")
+                    await Task.Delay(1000, cancellation.Token);
+
+                    if (!applicationStatus.IsInspectionRunning)
                     {
-                        var result = await workflowService.StartRunAsync(cancellation.Token);
-                        if(result.ResultImage != null)
-                        {
-                            DisplayMainImage = result.ResultImage as HObject;
-                        }
-                        ApplyResult(result);
+                        continue;
                     }
+
+                    if (!RecvPLCMsgQueue.TryDequeue(out string msg) || msg.Trim() != "1")
+                    {
+                        continue;
+                    }
+
+                    InspectionResult? result = await workflowService.StartRunAsync(cancellation.Token);
+                    if (result.ResultImage is HObject image)
+                    {
+                        DisplayMainImage = image;
+                    }
+
+                    ApplyResult(result);
+                    SendPLCResult(result.IsOk);
+                }
+                catch (OperationCanceledException) when (cancellation.Token.IsCancellationRequested)
+                {
+                    //点击停止或程序关闭时结束检测循环
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    logService.Error(LogCategory.Running, "本次检测错误!", ex);
                 }
             }
         }
-        catch (OperationCanceledException)
-        {
-            //任务被取消 不做记录
-        }
-        catch (Exception ex)
-        {
-            logService.Error(LogCategory.Running, $"检测错误 : {ex.Message}");
-        }
         finally
         {
-            applicationStatus.SetInspectionRunning(false);
-            IsRunning = false;
             if (ReferenceEquals(runCancellation, cancellation))
             {
                 runCancellation = null;
@@ -286,14 +291,30 @@ public sealed class DetectionViewModel : BindableBase
     private async Task StopInspectionAsync()
     {
         applicationStatus.SetInspectionRunning(false);
+        IsRunning = false;
         runCancellation?.Cancel();
         await workflowService.StopAsync();
-        IsRunning = false;
         logService.Info(LogCategory.Running, "检测停止运行...");
     }
     #endregion
 
     #region <<<其他方法
+    /// <summary>
+    /// 发送PLC结果
+    /// </summary>
+    private void SendPLCResult(bool result)
+    {
+        string sendMsg = string.Empty;
+        if (result)
+        {
+            sendMsg = "CCD10,0,0,0,0,0,OK!";
+        }
+        else
+        {
+            sendMsg = "CCD10,0,0,0,0,0,NG!";
+        }
+        this.plcClientService.SendAsync(sendMsg);
+    }
     private void ApplyResult(InspectionResult result)
     {
         CurrentID = result.ID;
@@ -309,9 +330,7 @@ public sealed class DetectionViewModel : BindableBase
 
         if (!result.IsOk)
         {
-            logService.Info(
-                LogCategory.Defect,
-                $"{result.ID} has {result.DefectCount} defects.");
+            logService.Info(LogCategory.Defect, $"{result.ID} has {result.DefectCount} defects.");
         }
     }
     private void ApplyStatistics(ProductionStatisticsSnapshot snapshot)

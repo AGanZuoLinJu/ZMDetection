@@ -38,7 +38,7 @@ public sealed class InspectionWorkflowService : IInspectionWorkflowService
         cancellationToken.ThrowIfCancellationRequested();
         using var linkedCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         currentRunCancellation = linkedCancellation;
-        var runToken = linkedCancellation.Token;
+        //var runToken = linkedCancellation.Token;
         IsRunning = true;
         InspectionResult result;
 
@@ -46,7 +46,7 @@ public sealed class InspectionWorkflowService : IInspectionWorkflowService
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            object? frame = await camera1!.GetOneFrameImageAsync(runToken);
+            object? frame = await camera1!.GetOneFrameImageAsync(linkedCancellation.Token);
             HObject? ho_inputImg = frame as HObject;
             if(ho_inputImg == null)
             {
@@ -56,7 +56,7 @@ public sealed class InspectionWorkflowService : IInspectionWorkflowService
                 logService.Error(LogCategory.Running, "检测错误,相机采集图像为空!");
                 return result;
             }
-            result = await inspectionService.RunInspectionAsync(ho_inputImg,runToken);
+            result = await inspectionService.RunInspectionAsync(ho_inputImg, linkedCancellation.Token);
 
             statisticsService.ApplyResult(result);
             logService.Info(LogCategory.Running, $"检测完成: {result.ID}, 结果={(result.IsOk ? "OK" : "NG")}");
@@ -64,6 +64,7 @@ public sealed class InspectionWorkflowService : IInspectionWorkflowService
         }
         finally
         {
+            //检测完成后token置空
             if (ReferenceEquals(currentRunCancellation, linkedCancellation))
             {
                 currentRunCancellation = null;

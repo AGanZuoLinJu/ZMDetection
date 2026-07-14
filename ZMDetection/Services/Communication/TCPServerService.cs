@@ -176,13 +176,31 @@ namespace ZMDetection.Services
                     NetworkStream stream = client.GetStream();
                     await stream.WriteAsync(data, 0, data.Length);
                     await stream.FlushAsync();
-                    _logService.Info(Models.LogCategory.Communication,$"发送[{clientId}]:{FormatData(data)}");
+                    //_logService.Info(Models.LogCategory.Communication,$"发送[{clientId}]:{FormatData(data)}");
                 }
                 catch (Exception ex)
                 {
                     _logService.Error(Models.LogCategory.Communication,$"服务端向客户端 {clientId} 发送数据失败：{ex.Message}");
                     ErrorOccurred?.Invoke(this, ex);
                     CleanupClient(clientId); 
+                }
+            }
+        }
+        public async Task SendToClientAsync(string clientId, string sendMsg)
+        {
+            if (_clients.TryGetValue(clientId, out TcpClient client))
+            {
+                try
+                {
+                    byte[] data = Encoding.UTF8.GetBytes(sendMsg);
+                    await SendToClientAsync(clientId, data);
+                    _logService.Info(Models.LogCategory.Communication, $"发送[{clientId}]:{sendMsg}");
+                }
+                catch (Exception ex)
+                {
+                    _logService.Error(Models.LogCategory.Communication, $"服务端向客户端 {clientId} 发送数据失败：{ex.Message}");
+                    ErrorOccurred?.Invoke(this, ex);
+                    CleanupClient(clientId);
                 }
             }
         }
@@ -201,7 +219,6 @@ namespace ZMDetection.Services
 
             await Task.WhenAll(tasks);
         }
-
         private static string FormatData(byte[] data)
         {
             const int maximumLogBytes = 256;

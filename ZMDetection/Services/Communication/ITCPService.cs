@@ -18,6 +18,7 @@ namespace ZMDetection.Services
         Task StartListeningAsync(int port);
         void StopListening();
         Task SendToClientAsync(string clientId, byte[] data);
+        Task SendToClientAsync(string clientId, string sendMsg);
         Task BroadcastAsync(byte[] data); 
     }
     public interface ITCPClientService
@@ -29,5 +30,6 @@ namespace ZMDetection.Services
         Task<bool> ConnectAsync(string ip, int port);
         void Disconnect();
         Task SendAsync(byte[] data);
+        Task SendAsync(string sendMsg);
     }
 }
