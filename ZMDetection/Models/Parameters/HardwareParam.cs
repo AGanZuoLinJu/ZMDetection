@@ -38,7 +38,7 @@ namespace ZMDetection.Models
             }
         }
 
-        #region 属性
+        #region <<<属性
         /// <summary>
         /// 光源亮度
         /// </summary>

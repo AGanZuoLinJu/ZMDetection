@@ -218,7 +218,7 @@ public sealed class StartupService : IStartupService
             "光源模块",
             async () =>
             {
-                await lightService.TurnOffAsync(cancellationToken);
+                await lightService.TurnOffAsync(1,cancellationToken);
                 await lightService.ReleaseAsync();
                 applicationStatus.SetLightStatus(lightService.Status);
                 return "正在释放光源模块";

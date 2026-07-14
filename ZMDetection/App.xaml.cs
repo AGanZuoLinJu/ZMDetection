@@ -142,7 +142,7 @@ public partial class App : PrismApplication
         containerRegistry.RegisterSingleton<IInspectionWorkflowService, InspectionWorkflowService>();
         //参数设置
         containerRegistry.RegisterSingleton<IParamService, ParamService>();
-        containerRegistry.RegisterSingleton<ILightService, MockLightService>();
+        containerRegistry.RegisterSingleton<ILightService, FGLightService>();
         containerRegistry.RegisterSingleton<IAddRecipeService, AddRecipeService>();
 
         containerRegistry.RegisterSingleton<IProductionStatisticsService, ProductionStatisticsService>();

@@ -3,10 +3,10 @@ namespace ZMDetection.Models;
 public sealed class InspectionResult
 {
     public InspectionResult(
-        string id,
         bool isOk,
         int defectCount,
-        long cycleTimeMilliseconds,
+        string id = "",
+        long cycleTimeMilliseconds = 0,
         object? resultImg = null,
         string message = "",
         IReadOnlyList<DefectDetail>? defects = null)
@@ -20,10 +20,10 @@ public sealed class InspectionResult
         ResultImage = resultImg;
     }
 
-    public string ID { get; }
+    public string ID { get; set; }
     public bool IsOk { get; }
     public int DefectCount { get; }
-    public long CycleTimeMilliseconds { get; }
+    public long CycleTimeMilliseconds { get; set; }
     public string Message { get; }
     public IReadOnlyList<DefectDetail> Defects { get; }
     public object? ResultImage { get; }

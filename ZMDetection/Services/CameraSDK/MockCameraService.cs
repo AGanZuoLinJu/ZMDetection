@@ -67,7 +67,7 @@ public sealed class MockCameraService : ICameraService
 
         HObject ho_image;
         HOperatorSet.GenEmptyObj(out ho_image);
-        HOperatorSet.ReadImage(out ho_image, "D:\\TestImage\\code12802.png");
+        HOperatorSet.ReadImage(out ho_image, "D:\\TestImage\\code3902.png");
         return Task.FromResult<object>(ho_image);
     }
     public string CapturePreview()

@@ -19,7 +19,7 @@ public sealed class MockAiDetectionService : IAIDetectionService
         return Task.CompletedTask;
     }
 
-    public Task<InspectionResult> DetectAsync(object inputImg, string id, CancellationToken cancellationToken)
+    public Task<InspectionResult> DetectAsync(object inputImg, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (!Status)
@@ -28,8 +28,7 @@ public sealed class MockAiDetectionService : IAIDetectionService
         }
 
         sequence++;
-        int defectCount = sequence % DefectTypeNames.Length + 1;
-        string[] defectNames = { "焊点连锡", "元件偏移", "缺件", "焊点虚焊" };
+        int defectCount = sequence % 5;
         DefectDetail[] defects = Enumerable.Range(0, defectCount)
             .Select(index => new DefectDetail(
                 DefectTypeNames[index % DefectTypeNames.Length],
@@ -41,10 +40,10 @@ public sealed class MockAiDetectionService : IAIDetectionService
             .ToArray();
 
         return Task.FromResult(new InspectionResult(
-            id,
             defectCount == 0,
             defectCount,
-            random.Next(650, 1100),
+            "AAAAAA",
+            0,
             inputImg,
             "AI检测完成",
             defects));

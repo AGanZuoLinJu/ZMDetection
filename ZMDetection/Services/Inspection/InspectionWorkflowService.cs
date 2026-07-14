@@ -44,19 +44,33 @@ public sealed class InspectionWorkflowService : IInspectionWorkflowService
 
         try
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
+            Stopwatch sw = Stopwatch.StartNew();//开始计时
+
+            #region <<<采集图像
             object? frame = await camera1!.GetOneFrameImageAsync(linkedCancellation.Token);
             HObject? ho_inputImg = frame as HObject;
-            if(ho_inputImg == null)
+            if (ho_inputImg == null)
             {
                 sw.Stop();
-                result = new InspectionResult("Error", false, 0, sw.ElapsedMilliseconds);
-                sw.Reset();
+                result = new InspectionResult(false, 0, "AAAAAA", sw.ElapsedMilliseconds, null, "Error");
                 logService.Error(LogCategory.Running, "检测错误,相机采集图像为空!");
                 return result;
             }
+            #endregion
+
+            #region <<<读码
+            HOperatorSet.CreateBarCodeModel(new HTuple(), new HTuple(), out HTuple hv_handle);
+            HOperatorSet.FindBarCode(ho_inputImg, out _, hv_handle, "auto", out HTuple hv_readID);
+            #endregion
+
+            #region <<<检测
             result = await inspectionService.RunInspectionAsync(ho_inputImg, linkedCancellation.Token);
+            #endregion
+
+            sw.Stop();                          //结束计时
+
+            result.ID = hv_readID.S;
+            result.CycleTimeMilliseconds = sw.ElapsedMilliseconds;
 
             statisticsService.ApplyResult(result);
             logService.Info(LogCategory.Running, $"检测完成: {result.ID}, 结果={(result.IsOk ? "OK" : "NG")}");

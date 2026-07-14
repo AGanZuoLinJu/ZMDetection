@@ -44,7 +44,6 @@ public sealed class ProductionStatisticsViewModel : BindableBase
             OnStatisticsChanged);
         RefreshCharts();
     }
-
     public DateTime? SelectedDate
     {
         get => selectedDate;
@@ -159,7 +158,7 @@ public sealed class ProductionStatisticsViewModel : BindableBase
         YieldRate = day.YieldRate;
         AverageCycleTime = day.AverageCycleTimeMilliseconds;
 
-        //创建环形图
+        //创建良率统计环形图
         DailyResultSeries = new ISeries[]
         {
             CreatePieSeries("OK", day.OkCount, OkColor),

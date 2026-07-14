@@ -1,4 +1,5 @@
 using HalconDotNet;
+using System.Diagnostics;
 using ZMDetection.Models;
 
 namespace ZMDetection.Services;
@@ -44,10 +45,7 @@ public sealed class InspectionService : IInspectionService
         {
             throw new InvalidOperationException("检测服务尚未初始化!");
         }
-
-        HOperatorSet.CreateBarCodeModel(new HTuple(), new HTuple(), out HTuple hv_handle);
-        HOperatorSet.FindBarCode((HObject)inputImg, out _, hv_handle, "auto", out HTuple readID);
-        return await aiDetectionService.DetectAsync(inputImg, readID.S,cancellationToken);
+        return await aiDetectionService.DetectAsync(inputImg, cancellationToken);
     }
     /// <summary>
     /// 释放检测

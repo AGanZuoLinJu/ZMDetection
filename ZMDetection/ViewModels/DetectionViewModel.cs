@@ -261,7 +261,7 @@ public sealed class DetectionViewModel : BindableBase
                     }
 
                     ApplyResult(result);
-                    SendPLCResult(result.IsOk);
+                    SendPLCResult(result.IsOk,result.ID);
                 }
                 catch (OperationCanceledException) when (cancellation.Token.IsCancellationRequested)
                 {
@@ -302,7 +302,7 @@ public sealed class DetectionViewModel : BindableBase
     /// <summary>
     /// 发送PLC结果
     /// </summary>
-    private void SendPLCResult(bool result)
+    private void SendPLCResult(bool result,string id)
     {
         string sendMsg = string.Empty;
         if (result)
